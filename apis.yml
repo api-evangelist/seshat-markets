@@ -3,6 +3,7 @@ description: A public, keyless, agent-native quantitative forecasting API by Ses
   forecasts, market/risk context, accuracy audits, and agent-intelligence signals for crypto, commodities, and pre-market
   equities. Authenticated entirely via x402 USDC micropayments on Solana and Base mainnet, with no API keys or subscriptions.
 url: https://raw.githubusercontent.com/api-evangelist/seshat-markets/refs/heads/main/apis.yml
+image: https://kronos.seshat.markets/assets/kronos-seshat-logo.webp
 created: '2026-09-05'
 modified: '2026-09-05'
 specificationVersion: '0.21'
@@ -27,6 +28,7 @@ apis:
   description: Live REST/JSON API with 32 endpoints for price-path forecasting, market/risk context, accuracy audits,
     and agent signals. Several endpoints are free; the rest are paid per-request via x402 USDC micropayments. Includes
     a published OpenAPI 3.1 contract, llms.txt, and an agent skill.
+  image: https://kronos.seshat.markets/assets/kronos-seshat-logo.webp
   humanURL: https://kronos.seshat.markets/api
   baseURL: https://kronos.seshat.markets/api
   tags:
@@ -47,16 +49,38 @@ apis:
   - agent-skills
   properties:
   - type: OpenAPI
-    url: https://kronos.seshat.markets/openapi.json
+    url: openapi/seshat-markets-kronos-quant-signal-api-openapi.json
   - type: Documentation
     url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
   - type: LLMsTxt
-    url: https://kronos.seshat.markets/kronos/llms.txt
+    url: https://kronos.seshat.markets/llms.txt
   - type: AgentSkill
     url: https://kronos.seshat.markets/kronos/skill.md
+  - type: MCPServer
+    url: mcp/seshat-markets-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Overlay
+    url: overlays/seshat-markets-kronos-overlay.yaml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
 maintainers:
 - FN: Seshat (Seshat Oracle)
   url: https://kronos.seshat.markets
+  email: admin@seshat.markets
+x-enrichment:
+  date: '2026-09-05'
+  status: enriched
+  artifacts_added: 25
+  pass: local-v3
 x-source:
   via: apis.io/add 4493d5b6, parked unverifiable_host; approved after the spec hunt
   fetched: '2026-09-05'
@@ -64,3 +88,58 @@ x-source:
     above was corrected to it. Slugged to the registrable domain seshat.markets (Kronos is the product on a subdomain;
     "kronos" alone collides with the workforce-software legacy brand). The root host soft-200s but /api/* discriminates
     -- control 404s at 155b.
+common:
+- type: Website
+  url: https://seshat.markets
+- type: VulnerabilityDisclosure
+  url: security/seshat-markets-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/seshat-markets-domain-security.yml
+- type: Authentication
+  url: authentication/seshat-markets-authentication.yml
+- type: Security
+  url: security/seshat-markets-vulnerability-disclosure.yml
+- type: Documentation
+  url: https://kronos.seshat.markets/docs
+- type: APIReference
+  url: https://kronos.seshat.markets/api
+- type: GettingStarted
+  url: https://kronos.seshat.markets/docs#start
+- type: Pricing
+  url: https://kronos.seshat.markets/pricing
+- type: TermsOfService
+  url: https://kronos.seshat.markets/terms.html
+- type: PrivacyPolicy
+  url: https://kronos.seshat.markets/privacy.html
+- type: StatusPage
+  url: https://seshat.markets/status.html
+- type: LLMsTxt
+  url: llms/seshat-markets-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: AgentCard
+  url: a2a/seshat-markets-a2a.yml
+- type: MCPServer
+  url: mcp/seshat-markets-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/seshat-markets-tool-crosswalk.yml
+- type: WellKnown
+  url: well-known/seshat-markets-well-known.yml
+- type: Conventions
+  url: conventions/seshat-markets-conventions.yml
+- type: Conformance
+  url: conformance/seshat-markets-conformance.yml
+- type: Lifecycle
+  url: lifecycle/seshat-markets-lifecycle.yml
+- type: Plans
+  url: plans/seshat-markets-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/seshat-markets-rate-limits.yml
+- type: ErrorCatalog
+  url: errors/seshat-markets-problem-types.yml
+- type: DataModel
+  url: data-model/seshat-markets-data-model.yml
+- type: Sandbox
+  url: sandbox/seshat-markets-sandbox.yml
+- type: Packages
+  url: packages/seshat-markets-packages.yml

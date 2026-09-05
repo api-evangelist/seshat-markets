@@ -1,0 +1,31 @@
+generated: '2026-09-05'
+method: searched
+source: https://kronos.seshat.markets/docs + registry probes 2026-09-05
+summary: >-
+  One first-party package is advertised and it does not resolve: the docs' MCP section
+  instructs `npx -y kronos-mcp`, but registry.npmjs.org/kronos-mcp returned HTTP 404
+  (2026-09-05) and an npm search for "kronos" surfaces only unrelated projects
+  (@kronos-integration/*, kronos-service-manager). No other first-party SDKs exist by design:
+  the docs' Node/Python integration patterns use the third-party x402 ecosystem libraries
+  (@x402/fetch, @x402/axios, @x402/evm, x402-requests) plus plain curl/requests/fetch.
+packages:
+- name: kronos-mcp
+  registry: npm
+  official: true
+  version: null
+  published: null
+  install: npx -y kronos-mcp
+  note: >-
+    Advertised in the provider's own docs as the MCP connector, but absent from the public
+    npm registry (404 on the metadata endpoint, 2026-09-05). Checked, nothing to record - the
+    documented install command cannot currently succeed, one of the strongest
+    docs-ahead-of-shipping signals in this profile.
+third_party_dependencies:
+- name: '@x402/fetch'
+  registry: npm
+  official: false
+  note: x402 payment wrapper for fetch, recommended in the docs' Node SDK pattern. Third-party (x402 ecosystem), not Seshat-published - not counted as a first-party SDK.
+- name: x402-requests
+  registry: pypi
+  official: false
+  note: Official x402 Python SDK recommended in the docs for automatic 402 handling. Third-party, not Seshat-published.

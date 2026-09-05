@@ -1,0 +1,59 @@
+generated: '2026-09-05'
+method: searched
+source: https://kronos.seshat.markets/pricing
+machine_readable: https://kronos.seshat.markets/api/feeds/kronos/catalog
+machine_readable_note: >-
+  The free catalog endpoint (probed 200) carries the same per-endpoint x402 pricing as
+  structured JSON (products{} with price_usd, price_per_tf_usd, price_cap_usd, payment_flow),
+  and /.well-known/x402 lists the paid resources - pricing here is provider-published data,
+  not marketing prose.
+model: pay-per-request
+plan_count: 0
+plan_count_note: >-
+  Deliberate zero: there are no tiers, subscriptions, seats or monthly fees at all - every
+  endpoint is priced per call (or per timeframe) in USD, settled as USDC on Solana or Base via
+  x402 micropayments. No signup, no API keys. The only "discount" is automatic: /predict and
+  /forecast-distribution cap at $0.04 for all 5 timeframes (20% off), and ?refresh=true costs
+  2x for fresh GPU inference.
+currency: USD
+settlement: USDC on Solana mainnet (~400ms, ~$0.001 fees) or Base L2 (~2s, ~$0.01 fees)
+price_range:
+  min_usd: 0.001
+  max_usd: 0.05
+payment_flows:
+  upfront: settles before the handler runs - GPU endpoints (predict, forecast-distribution, playground, market-brief) and semantic search (similar-markets, outcome-stats, behavioral-correlations, rationale-novelty)
+  after_delivery: settles only on successful response - cached/metadata endpoints (accuracy, market-context, decisions, regime, benchmark, etc.)
+paid_endpoints:
+- {endpoint: 'GET /api/feeds/kronos/accuracy', price_usd: 0.001, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/accuracy/candles', price_usd: 0.005, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/risk/history', price_usd: 0.02, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/predict/{symbolKey}', price_usd: 0.01, unit: timeframe, cap_usd: 0.04, flow: upfront, refresh_multiplier: 2}
+- {endpoint: 'GET /api/feeds/kronos/decisions', price_usd: 0.001, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/forecast-evolution/{symbolKey}', price_usd: 0.005, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/forecast-distribution/{symbolKey}', price_usd: 0.01, unit: timeframe, cap_usd: 0.04, flow: upfront}
+- {endpoint: 'GET /api/feeds/kronos/historical-analogs/{symbolKey}', price_usd: 0.01, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/regime', price_usd: 0.02, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/agent/track-record', price_usd: 0.001, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/agent/votes', price_usd: 0.003, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/agent/signals', price_usd: 0.005, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/composite/{symbolKey}', price_usd: 0.01, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/confluence/{symbolKey}', price_usd: 0.01, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/benchmark', price_usd: 0.02, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/digest/{symbolKey}', price_usd: 0.03, unit: call, flow: after_delivery}
+- {endpoint: 'GET /api/feeds/kronos/market-brief/{symbolKey}', price_usd: 0.05, unit: call, flow: upfront}
+- {endpoint: 'GET /api/feeds/similar-markets', price_usd: 0.005, unit: call, flow: upfront}
+- {endpoint: 'GET /api/feeds/similar-markets/outcome-stats', price_usd: 0.01, unit: call, flow: upfront}
+- {endpoint: 'GET /api/feeds/agent-intelligence/behavioral-correlations', price_usd: 0.01, unit: call, flow: upfront}
+- {endpoint: 'GET /api/feeds/agent-intelligence/rationale-novelty', price_usd: 0.01, unit: call, flow: upfront}
+- {endpoint: 'GET /api/feeds/kronos/market-context/{symbolKey}', price_usd: 0.03, unit: call, flow: after_delivery}
+- {endpoint: 'POST /api/feeds/kronos/playground/{symbolKey}', price_usd: 0.005, unit: per 20 samples, flow: upfront}
+free_endpoints:
+- GET /api/feeds/kronos/catalog
+- GET /api/feeds/kronos/sample/btc_usdt
+- GET /api/feeds/kronos/accuracy-preview/{symbolKey}
+- GET /api/feeds/kronos/accuracy/candles-preview
+- GET /api/feeds/kronos/conviction-signals
+- GET /api/feeds/kronos/risk
+- GET /api/feeds/kronos/decision/{decisionId}
+- GET /api/feeds/kronos/composite-preview/{symbolKey}
+- GET /api/feeds/kronos/benchmark-preview

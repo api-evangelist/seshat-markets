@@ -1,0 +1,33 @@
+generated: '2026-09-05'
+method: derived
+source: openapi/seshat-markets-kronos-quant-signal-api-openapi.json + https://kronos.seshat.markets/kronos/registry.json
+entities:
+- name: Symbol
+  id_field: symbolKey (e.g. btc_usdt)
+  note: Curated catalog entries with assetClass (crypto/commodity/equity), instrumentType (spot/futures/perpetual), venue (Binance/OKX/Gate) and underlying; on-demand discovery extends to any valid Gate.io symbol.
+- name: KronosForecastResponse
+  note: Top-level payload of /predict - consensus + per-timeframe results.
+- name: KronosConsensus
+  note: Cross-timeframe consensus - direction (LONG/SHORT), probability.
+- name: KronosTimeframeResult
+  note: Per-timeframe forecast (5m/15m/1h/4h/1d) with conformal ranges and pred_candles.
+- name: KronosForecast
+  note: Single forecast record with calibrated bounds.
+- name: Decision
+  id_field: decisionId (UUID)
+  note: Auditable decision record - full prediction, audit status (audited/auditing/pending), forecast bounds, Brier score, pred_candles. The audit trail spine of the product.
+- name: KronosSamplePolicy
+  note: Delay policy for the free delayed sample (per-timeframe scaled delay).
+- name: Error
+  note: 'Shared error envelope {error, detail, retry_token?, refund_reference?}.'
+relationships:
+- {from: KronosForecastResponse, to: KronosConsensus, kind: has_one, via: consensus}
+- {from: KronosForecastResponse, to: KronosTimeframeResult, kind: has_many, via: per_timeframe}
+- {from: KronosTimeframeResult, to: KronosForecast, kind: has_one, via: forecast}
+- {from: Decision, to: Symbol, kind: belongs_to, via: symbolKey}
+- {from: KronosForecastResponse, to: Decision, kind: has_one, via: decision_id, note: every fresh prediction is written as an auditable decision record}
+- {from: Symbol, to: Decision, kind: has_many, via: '?symbol filter on /decisions'}
+- {from: Symbol, to: KronosForecastResponse, kind: has_many, via: '/predict/{symbolKey}'}
+id_conventions:
+  decisionId: UUID, validated against UUID format
+  symbolKey: lowercase pair key like btc_usdt; validated against catalog or Gate.io on-demand rules

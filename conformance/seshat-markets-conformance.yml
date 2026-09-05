@@ -1,0 +1,55 @@
+generated: '2026-09-05'
+method: derived
+source: openapi + live well-known probes + https://kronos.seshat.markets/docs + /security
+conformance:
+- id: x402
+  conforms: true
+  evidence: >-
+    Payment-native auth across the whole paid surface: /.well-known/x402 discovery manifest
+    (probed 200, version 1 + 20 resources), x402Payment securityScheme in the OpenAPI
+    (PAYMENT-SIGNATURE / legacy X-PAYMENT headers), documented 402 challenge flow with
+    accepts requirements, settled as USDC on Solana mainnet + Base mainnet via the PayAI
+    facilitator (EIP-3009, Permit2, exact SVM schemes). This is the domain-standard signature
+    for the agent-payments market, declared in the contract itself, not just prose.
+- id: a2a
+  conforms: false
+  evidence: >-
+    A2A cards are served on both the canonical and legacy well-known paths and a live JSON-RPC
+    endpoint answers at /a2a, but the canonical card fails a hard A2A 1.0.0 check
+    (capabilities is an array) - graded flavored in a2a/seshat-markets-a2a.yml. The legacy
+    card is near-conformant.
+- id: openapi-3.1
+  conforms: true
+  evidence: >-
+    Published contract at https://kronos.seshat.markets/openapi.json (and /kronos/openapi.json,
+    byte-identical) - OpenAPI 3.1.0, 32 operations, servers, components, securitySchemes.
+- id: mcp
+  conforms: false
+  evidence: >-
+    MCP integration is documented (npx -y kronos-mcp, three named free tools) but the package
+    404s on the public npm registry, so no MCP conformance can be established against a
+    reachable artifact.
+- id: llms-txt
+  conforms: true
+  evidence: >-
+    /llms.txt served (200, text/plain, 11KB) at both the host root and /kronos/llms.txt,
+    following the llms.txt discovery-section format.
+- id: rfc9457
+  conforms: false
+  evidence: >-
+    Errors are a custom {error, detail} JSON envelope, not application/problem+json.
+- id: oauth2
+  conforms: false
+  evidence: >-
+    Deliberate: no API keys or OAuth at all - x402 payment IS the authentication. No
+    oauth-authorization-server metadata is served (308 to the SPA shell).
+- id: rate-limit-signaling
+  conforms: true
+  evidence: >-
+    429 + machine-readable rate_limited code + Retry-After header documented in the error
+    catalog (docs#errors, skill.md).
+- id: hsts
+  conforms: true
+  evidence: >-
+    Strict-Transport-Security max-age=31536000; includeSubDomains; preload documented on
+    /security and observed by the domain-security probe (security/seshat-markets-domain-security.yml).

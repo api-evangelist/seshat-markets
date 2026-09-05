@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "resources": [
+    "https://kronos.seshat.markets/api/feeds/kronos/predict/btc_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/predict/eth_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/predict/sol_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/predict/xrp_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/predict/bnb_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/accuracy/btc_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/risk/history",
+    "https://kronos.seshat.markets/api/feeds/kronos/regime",
+    "https://kronos.seshat.markets/api/feeds/kronos/forecast-evolution/btc_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/historical-analogs/btc_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/composite/btc_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/confluence/btc_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/digest/btc_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/market-brief/btc_usdt",
+    "https://kronos.seshat.markets/api/feeds/kronos/agent/track-record",
+    "https://kronos.seshat.markets/api/feeds/kronos/agent/votes",
+    "https://kronos.seshat.markets/api/feeds/kronos/agent/signals",
+    "https://kronos.seshat.markets/api/feeds/kronos/benchmark",
+    "https://kronos.seshat.markets/api/feeds/kronos/decisions",
+    "https://kronos.seshat.markets/api/feeds/kronos/conviction-signals"
+  ]
+}

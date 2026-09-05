@@ -1,0 +1,37 @@
+generated: '2026-09-05'
+method: searched
+source: https://kronos.seshat.markets/docs#start + registry.json products.sample
+model: free-delayed-production-data
+note: >-
+  No separate sandbox environment, test mode or test keys exist (there are no keys at all).
+  Instead the provider publishes real production model output, delayed, as a free
+  integration-testing surface - "no friction, no wallet, for integration testing" - plus free
+  previews of most paid products. Delay is per-timeframe scaled so the payload shape is
+  exactly what paid endpoints return.
+test_surfaces:
+- endpoint: GET /api/feeds/kronos/sample/btc_usdt
+  purpose: Real BTC model output across all 5 timeframes for parser/integration testing
+  delay:
+    5m: 2h
+    15m: 6h
+    1h: 24h
+    4h: 48h
+    1d: 72h
+- endpoint: GET /api/feeds/kronos/catalog
+  purpose: Machine-readable product catalog with x402 pricing - the documented first call
+- endpoint: GET /api/feeds/kronos/accuracy-preview/{symbolKey}
+  purpose: Free headline accuracy metrics preview
+- endpoint: GET /api/feeds/kronos/accuracy/candles-preview
+  purpose: Free aggregate candle-audit preview (rounded)
+- endpoint: GET /api/feeds/kronos/composite-preview/{symbolKey}
+  purpose: Free Quant-vs-Crowd divergence preview
+- endpoint: GET /api/feeds/kronos/benchmark-preview
+  purpose: Free leaderboard preview (fixed 7-day window)
+- endpoint: GET /api/feeds/kronos/conviction-signals
+  purpose: Free delayed conviction signals (pre-today)
+payment_testing: >-
+  The docs recommend testing free tools before enabling automated x402 payments. The Node SDK
+  example uses Base Sepolia (eip155:84532) in its scheme config, but the live manifest is
+  mainnet-only (enforcement per skill.md: active_mainnet); no testnet payment sandbox is
+  published. Docs instruct never to hardcode chain IDs - always read them from the live 402
+  challenge.

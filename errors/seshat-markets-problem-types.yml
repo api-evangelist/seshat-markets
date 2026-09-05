@@ -1,0 +1,54 @@
+generated: '2026-09-05'
+method: searched
+source: https://kronos.seshat.markets/docs#errors
+derived_from: openapi/seshat-markets-kronos-quant-signal-api-openapi.json
+format: json-error-envelope
+format_note: >-
+  Not RFC 9457 problem+json. Every error body is JSON with "error" (machine-readable code)
+  and optional "detail" (human explanation). The OpenAPI declares 4xx/5xx responses on the
+  Error schema across operations (404 on 9 ops, 503 on 7, 402 on 3, plus 400/429/500/502).
+  Deliberately generic: the /security page documents that no stack traces, SQL, paths or
+  internal hostnames ever appear in error responses.
+envelope:
+  error: machine-readable error code
+  detail: optional human-readable explanation
+  retry_token: one-time retry token (1h TTL) on 5xx after upfront payment settlement
+  refund_reference: on-chain tx hash of the settled payment, cited when requesting a manual refund
+problem_types:
+- code: payment_required
+  status: 402
+  title: Paid endpoint called without payment
+  remediation: Parse the x402 challenge, sign the payment, retry with X-PAYMENT + X-REQUEST-ID headers.
+- code: rate_limited
+  status: 429
+  title: Too many requests
+  remediation: Back off; honor the Retry-After header; prefer cached responses (omit ?refresh=true). detail names which limit was hit.
+- code: kronos_disabled
+  status: 503
+  title: Service disabled server-side
+  remediation: Retry later; check the free /risk endpoint for operational status. A server configuration state, not a client error.
+- code: forecast_unavailable
+  status: 503
+  title: Not enough candle data for the symbol
+  remediation: Try another symbol or wait for upstream data.
+- code: kronos_error
+  status: 500
+  title: Internal server error
+  remediation: >-
+    If retry_token is present, retry the same request with the X-Retry-Token header (one-time
+    use, 1h TTL). If refund_reference is present, contact support with that tx hash for a
+    manual refund.
+- code: unknown_symbol
+  status: 404
+  title: Symbol not in catalog
+  remediation: Check /catalog for supported symbols (or on-demand discovery rules for Gate.io symbols).
+- code: missing_* / invalid_*
+  status: 400
+  title: Missing or invalid parameter
+  remediation: Fix the request parameters and retry. No payment is charged for 400 errors.
+payment_failure_semantics: >-
+  Upfront-flow endpoints (predict, forecast-distribution, playground, market-brief,
+  similar-markets, outcome-stats, behavioral-correlations, rationale-novelty): a 5xx after
+  settlement includes retry_token and refund_reference. Authorization-flow endpoints settle
+  only on 2xx - no refund needed on 5xx. Failed requests are never charged (registry.json
+  error_policy).

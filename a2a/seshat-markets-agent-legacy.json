@@ -1,0 +1,79 @@
+{
+  "name": "Kronos Quant Signal API",
+  "description": "Multi-asset financial intelligence: crypto, commodities, and pre-market equities. Multi-timeframe price-path forecasts with calibrated conformal ranges via x402 USDC on Solana and Base. 32 endpoints from $0.001 to $0.05 per request.",
+  "version": "1.0.0",
+  "protocolVersion": "0.3",
+  "agent_id": "https://kronos.seshat.markets/.well-known/agent.json",
+  "type": "seller",
+  "endpoint": "https://kronos.seshat.markets/api/feeds/kronos/predict/btc_usdt",
+  "public_key": "ed25519:FtgM+QwA/erI65B5aKd52+YwbAlU9Ng/ADa2aCNThlg=",
+  "supportedInterfaces": [
+    {
+      "url": "https://kronos.seshat.markets/a2a",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    },
+    {
+      "url": "https://kronos.seshat.markets/api/feeds/kronos/predict/btc_usdt",
+      "protocolBinding": "HTTP+JSON",
+      "protocolVersion": "0.3"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "defaultInputModes": ["application/json"],
+  "defaultOutputModes": ["application/json"],
+  "skills": [
+    {
+      "id": "kronos-predict",
+      "name": "Price Path Forecast",
+      "description": "Multi-timeframe price-path forecasts with calibrated conformal prediction intervals for crypto, commodities, and pre-market equities.",
+      "tags": ["finance", "crypto", "forecasting", "prediction", "x402"],
+      "examples": ["Predict BTC_USDT price path for next 24h"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "kronos-signals",
+      "name": "Trading Signals",
+      "description": "Quantitative trading signals with regime detection and confidence scoring.",
+      "tags": ["finance", "signals", "trading", "x402"],
+      "examples": ["Get trading signals for ETH_USDT"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    },
+    {
+      "id": "kronos-calibration",
+      "name": "Calibration Metrics",
+      "description": "Historical calibration and accuracy metrics for all prediction endpoints.",
+      "tags": ["finance", "calibration", "accuracy", "x402"],
+      "examples": ["Get calibration metrics for BTC predictions"],
+      "inputModes": ["application/json"],
+      "outputModes": ["application/json"]
+    }
+  ],
+  "provider": {
+    "organization": "Seshat",
+    "url": "https://seshat.markets"
+  },
+  "payment": ["x402"],
+  "authentication": {
+    "type": "x402",
+    "description": "HTTP 402 payment protocol — USDC on Base and Solana. No API key required.",
+    "payTo": "0xBedaC66CeB25dbE53Bb36cAEBc863DA0Ec4c965A",
+    "networks": ["eip155:8453", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"]
+  },
+  "catalog": {
+    "categories": ["finance", "crypto", "forecasting", "commodities"],
+    "sku_count": 32,
+    "price_range": {
+      "min": 0.001,
+      "max": 0.05,
+      "currency": "USD"
+    }
+  },
+  "protocols": ["metad/1.0", "mcp/1.0", "a2a/1.0"]
+}

@@ -1,0 +1,87 @@
+generated: '2026-09-05'
+method: probed
+source: live probes of /.well-known/ on kronos.seshat.markets, seshat.markets and www.seshat.markets
+summary: >-
+  Three real documents are served, all on the API/product host kronos.seshat.markets: an x402
+  payment-discovery manifest (version 1 + a 20-entry paid-resource list), an A2A agent card at
+  the canonical /.well-known/agent-card.json, and a second card at the legacy
+  /.well-known/agent.json. That is a genuine WellKnown hit. Nothing else is served anywhere:
+  no security.txt (so NO SecurityTxt pointer), no openid-configuration, no
+  oauth-authorization-server (consistent with the keyless x402 auth model), no api-catalog,
+  and no ai-plugin.json.
+pointer_basis: >-
+  WellKnown pointer emitted on the strength of the three 200 JSON documents on
+  kronos.seshat.markets. SecurityTxt pointer NOT emitted - RFC 9116 is unimplemented on every
+  host (the /security page carries the disclosure contact instead).
+false_positive_watch: >-
+  kronos.seshat.markets 308-redirects unknown /.well-known/* paths to seshat.markets, and
+  seshat.markets answers HTTP 200 with its 5,092-byte SPA landing shell for EVERY
+  /.well-known/* path, including paths that do not exist. Those 200s are recorded below as
+  misses, not hits.
+hosts:
+- host: https://kronos.seshat.markets
+  documents:
+  - path: /.well-known/x402
+    status: 200
+    file: seshat-markets-x402.json
+    note: x402 payment discovery manifest - version 1 plus resources[] listing 20 paid endpoints
+  - path: /.well-known/agent-card.json
+    status: 200
+    file: ../a2a/seshat-markets-agent-card.json
+    note: A2A agent card (canonical path) - graded in a2a/seshat-markets-a2a.yml
+  - path: /.well-known/agent.json
+    status: 200
+    file: ../a2a/seshat-markets-agent-legacy.json
+    note: A2A agent card (legacy pre-0.3 path) - capabilities is an object here, unlike the canonical card
+  - path: /.well-known/security.txt
+    status: 308
+    note: redirects to seshat.markets which serves the SPA shell - a miss
+  - path: /.well-known/openid-configuration
+    status: 308
+    note: redirects to the seshat.markets SPA shell - a miss
+  - path: /.well-known/oauth-authorization-server
+    status: 308
+    note: redirects to the seshat.markets SPA shell - a miss
+  - path: /.well-known/oauth-protected-resource
+    status: 308
+    note: redirects to the seshat.markets SPA shell - a miss
+  - path: /.well-known/api-catalog
+    status: 308
+    note: redirects to the seshat.markets SPA shell - a miss
+  - path: /.well-known/ai-plugin.json
+    status: 308
+    note: redirects to the seshat.markets SPA shell - a miss
+- host: https://seshat.markets
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    note: 5,092-byte HTML SPA shell, not a document - a miss
+  - path: /.well-known/openid-configuration
+    status: 200
+    note: SPA shell - a miss
+  - path: /.well-known/oauth-authorization-server
+    status: 200
+    note: SPA shell - a miss
+  - path: /.well-known/oauth-protected-resource
+    status: 200
+    note: SPA shell - a miss
+  - path: /.well-known/api-catalog
+    status: 200
+    note: SPA shell - a miss
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    note: SPA shell - a miss
+  - path: /.well-known/x402
+    status: 200
+    note: SPA shell - a miss (the real manifest is on kronos.seshat.markets)
+  - path: /.well-known/agent-card.json
+    status: 200
+    note: SPA shell - a miss
+  - path: /.well-known/agent.json
+    status: 200
+    note: SPA shell - a miss
+- host: https://www.seshat.markets
+  documents:
+  - path: /.well-known/security.txt
+    status: 308
+    note: redirects to seshat.markets SPA shell - a miss (all nine probed paths 308 the same way)

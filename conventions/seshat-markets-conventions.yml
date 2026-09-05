@@ -1,0 +1,73 @@
+generated: '2026-09-05'
+method: searched
+source: https://kronos.seshat.markets/docs + /api + /security + OpenAPI
+auth:
+  style: x402 micropayment (no API keys, no OAuth, no signup)
+  headers:
+  - PAYMENT-SIGNATURE (x402 v2 payment payload; OpenAPI securityScheme)
+  - X-PAYMENT (legacy payment header, still accepted)
+  - X-REQUEST-ID (client request correlation on paid retries)
+  free_endpoints: no auth of any kind
+idempotency:
+  coverage: na
+  na_basis: >-
+    The API has no state-mutating write surface to protect: all 32 operations are reads
+    (31 GET + 1 POST /playground/{symbolKey}, which runs stateless GPU inference and stores
+    nothing the caller owns). The money-side replay concern is handled by the x402 flow
+    itself: upfront-flow 5xx responses return a one-time retry_token (X-Retry-Token header,
+    1h TTL) so a paid request can be retried without paying twice, and after-delivery flow
+    only settles on 2xx.
+  retry_token:
+    header: X-Retry-Token
+    ttl: 1h
+    one_time: true
+    applies_to: upfront-flow endpoints after 5xx with settled payment
+reversibility:
+  grade: documented
+  applies_to: payments (the API itself has no destructive writes - read-only data surface)
+  reversal_paths:
+  - action: refund of a settled upfront payment after handler failure (HTTP 5xx)
+    mechanism: manual on-chain USDC transfer back to the payer address
+    how: contact support citing X-Request-Id and the refund_reference tx hash from the error body
+    window_stated: refund issued within 5 business days of the request
+    docs: https://kronos.seshat.markets/docs#refunds
+  - action: after-delivery flow avoids the need for reversal
+    mechanism: payment only settles on successful (2xx) responses
+    docs: https://kronos.seshat.markets/docs#refunds
+  non_reversible:
+  - >-
+    Successful delivery is final: HTTP 200 with valid data = no refund, including forecasts
+    that turn out wrong ("research signals, not guarantees"). Kronos cannot reverse a settled
+    on-chain transaction - refunds are equivalent-value transfers, not reversals.
+  note: >-
+    Graded documented rather than verified: the refund path and its 5-business-day processing
+    commitment are stated, but there is no stated request window (how long after failure a
+    refund may be claimed).
+pagination:
+  style: limit-based query parameters, no cursors
+  params: '?limit (max 100 on /decisions, 20 with ?detail=1; max 50 on /similar-markets; max 1000 on /forecast-evolution), ?days, ?hours'
+field_expansion:
+  style: '?detail=1 on /decisions includes full pred_candles arrays (default stripped); ?summary=1 on /forecast-evolution for summary-only'
+request_tracing:
+  header: X-Request-Id
+  note: cited in refund/support flows alongside the transaction hash
+versioning:
+  style: unversioned paths; contract versioned in OpenAPI info.version (2.1.0) and registry.json
+error_envelope:
+  shape: '{error: <code>, detail?: <text>, retry_token?, refund_reference?}'
+  see: errors/seshat-markets-problem-types.yml
+rate_limit_signaling:
+  status: 429
+  code: rate_limited
+  header: Retry-After
+  see: rate-limits/seshat-markets-rate-limits.yml
+caching:
+  style: >-
+    Server-side forecast cache with per-timeframe TTLs (published in /catalog cacheTtlMs);
+    ?refresh=true bypasses the cache at 2x price; concurrent fresh requests for the same
+    symbol/timeframe window share one GPU run (registry.json deduplication policy).
+dry_run:
+  coverage: na
+  note: >-
+    No dry-run mode and none needed for reads; the free delayed /sample/btc_usdt endpoint and
+    free previews serve the rehearsal role for integration testing (see sandbox/).

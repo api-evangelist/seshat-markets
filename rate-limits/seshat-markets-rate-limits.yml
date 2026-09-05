@@ -1,0 +1,26 @@
+generated: '2026-09-05'
+method: searched
+source: https://kronos.seshat.markets/api
+secondary_source: https://kronos.seshat.markets/security
+limit_count: 9
+note: >-
+  Limits are published per-endpoint in two docs tables (the /api overview and the /security
+  hardening page). Scoping is dual: per IP and, on paid endpoints, per payer wallet - the
+  x402 wallet plays the role an API key would. On exhaustion the API returns HTTP 429 with
+  error code "rate_limited" and a detail field naming which limit was hit.
+response_headers:
+  retry_after: true
+  retry_after_note: skill.md instructs agents to back off and check the Retry-After header on 429
+  x_ratelimit: not documented
+status_on_exhaustion: 429
+error_code: rate_limited
+limits:
+- {scope: per-ip + per-wallet, endpoint: 'predict (cached)', limit: 10, window: 1m, wallet_limit: 20, wallet_window: 1m}
+- {scope: per-ip + per-wallet, endpoint: 'predict (?refresh=true)', limit: 2, window: 1m, wallet_limit: 20, wallet_window: 1m}
+- {scope: per-ip + per-wallet, endpoint: forecast-distribution, limit: 10, window: 1m, wallet_limit: 20, wallet_window: 1m}
+- {scope: per-ip + per-wallet, endpoint: playground, limit: 3, window: 5m, wallet_limit: 3, wallet_window: 5m}
+- {scope: per-wallet, endpoint: 'market-brief / digest (GPU-intensive)', limit: 10, window: 1m}
+- {scope: per-wallet, endpoint: 'paid endpoints (default)', limit: 30-60, window: 1m, note: varies per endpoint}
+- {scope: per-ip, endpoint: 'on-demand discovery (new symbols)', limit: 10, window: 1h}
+- {scope: per-ip, endpoint: 'decision/{decisionId} (free)', limit: 30, window: 5m}
+- {scope: per-ip, endpoint: 'free endpoints (risk, catalog, previews)', limit: 30, window: 1m}

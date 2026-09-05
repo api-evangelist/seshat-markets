@@ -1,0 +1,39 @@
+generated: '2026-09-05'
+method: searched
+source: https://kronos.seshat.markets/docs#mcp
+deployment:
+  mode: local-stdio
+  install: npx -y kronos-mcp
+  package: null
+  auth: none
+  verified: searched
+  note: >-
+    The docs instruct 'npx -y kronos-mcp' over stdio ("no persistent local installation and no
+    user-hosted server are required" - but this is still a local stdio connector, not a hosted
+    remote endpoint; no https MCP URL is published anywhere). PROBLEM: the package does not
+    resolve - registry.npmjs.org/kronos-mcp returned HTTP 404 on 2026-09-05, so the documented
+    npx command cannot install anything from the public registry. Recorded honestly as
+    local-stdio per the provider's docs with package: null; see packages/ for the registry
+    probe. The legacy agent card lists protocols [metad/1.0, mcp/1.0, a2a/1.0] but names no
+    MCP endpoint either.
+payments:
+  model: x402
+  note: >-
+    Free tools work without a wallet. Paid tools pay automatically only when the operator sets
+    KRONOS_X402_EVM_PRIVATE_KEY (Base) and/or KRONOS_X402_SOLANA_PRIVATE_KEY (Solana) in the
+    local MCP process environment - buyer secrets that never reach Kronos.
+tool_count: 3+
+tools_note: >-
+  Only the three free tools are named in the docs; the full tool list would require installing
+  the connector, which is unpublished on npm (404). Paid tools exist per the docs but are not
+  enumerated anywhere public.
+tools:
+- name: kronos_catalog
+  category: discovery
+  description: Product catalog - supported symbols, timeframes, cache TTLs, model config, and x402 pricing per endpoint. Free, no wallet.
+- name: kronos_sample
+  category: testing
+  description: Real delayed BTC model output across all 5 timeframes for integration testing. Free, no wallet.
+- name: kronos_risk
+  category: risk
+  description: Current operational risk state. Free, no wallet.

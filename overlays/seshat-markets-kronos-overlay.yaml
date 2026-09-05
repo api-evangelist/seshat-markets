@@ -1,0 +1,39 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the Kronos Quant Signal API
+  version: 1.0.0
+x-generated: '2026-09-05'
+x-method: generated
+x-source: catalog artifacts in this repository (never mutates the original spec)
+extends: ../openapi/seshat-markets-kronos-quant-signal-api-openapi.json
+actions:
+- target: $.info
+  update:
+    x-artifacts:
+      llms-txt: ../llms/seshat-markets-llms.txt
+      agent-skill: ../skills/seshat-markets-kronos-agent-quickstart.md
+      agent-card: ../a2a/seshat-markets-agent-card.json
+      x402-manifest: ../well-known/seshat-markets-x402.json
+      plans: ../plans/seshat-markets-plans-pricing.yml
+      rate-limits: ../rate-limits/seshat-markets-rate-limits.yml
+      error-catalog: ../errors/seshat-markets-problem-types.yml
+      conventions: ../conventions/seshat-markets-conventions.yml
+- target: $.info
+  update:
+    x-payment-model: >-
+      Keyless x402 USDC micropayments on Solana mainnet and Base mainnet ($0.001-$0.05 per
+      request); free discovery/testing endpoints require no payment. Failed requests are not
+      charged; upfront-flow 5xx responses carry retry_token (X-Retry-Token, 1h TTL) and
+      refund_reference.
+- target: $.paths['/feeds/kronos/catalog'].get
+  update:
+    x-agent-note: Documented first call for agents - returns symbols, timeframes, cache TTLs and per-endpoint x402 pricing.
+- target: $.paths['/feeds/kronos/sample/btc_usdt'].get
+  update:
+    x-agent-note: Free delayed production output for integration testing - validate parsing here before paying.
+- target: $.paths['/feeds/kronos/predict/{symbolKey}'].get
+  update:
+    x-rate-limit: 10/min per IP cached, 2/min per IP with ?refresh=true, 20/min per wallet
+- target: $.paths['/feeds/kronos/playground/{symbolKey}'].post
+  update:
+    x-rate-limit: 3 per 5 minutes per IP and per payer wallet

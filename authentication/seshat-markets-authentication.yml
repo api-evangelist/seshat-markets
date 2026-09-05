@@ -1,0 +1,27 @@
+generated: '2026-09-05'
+method: searched
+source: openapi/seshat-markets-kronos-quant-signal-api-openapi.json
+docs: https://kronos.seshat.markets/docs#x402
+model: >-
+  Keyless by design: x402 micropayments ARE the authentication. Paid endpoints answer HTTP
+  402 with a signed payment requirement (price, USDC asset, destination, network); the
+  buyer-controlled wallet signs an authorization and the client retries with the payment in
+  the PAYMENT-SIGNATURE (or legacy X-PAYMENT) header. Settlement is real USDC on Solana
+  mainnet (~400ms) or Base L2 (~2s) via the PayAI facilitator, using EIP-3009/Permit2 (EVM)
+  or exact SVM (Solana) schemes - see /.well-known/x402 (saved in well-known/). Free
+  endpoints require no credentials at all; there is no signup, no API key, and no OAuth.
+summary:
+  types:
+  - apiKey
+  api_key_in:
+  - header
+schemes:
+- name: x402Payment
+  type: apiKey
+  in: header
+  parameter: PAYMENT-SIGNATURE
+  description: x402 v2 payment payload. Required for paid endpoints when the service manifest
+    at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header
+    (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+  sources:
+  - openapi/seshat-markets-kronos-quant-signal-api-openapi.json

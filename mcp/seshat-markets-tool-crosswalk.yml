@@ -1,0 +1,70 @@
+generated: '2026-09-05'
+method: derived
+source: mcp/seshat-markets-mcp.yml + openapi/seshat-markets-kronos-quant-signal-api-openapi.json
+note: >-
+  Kronos documents an MCP connector (npx -y kronos-mcp) whose live schema cannot be
+  introspected - the package 404s on the public npm registry - so this crosswalk binds the
+  three free tools named in the docs to their backing REST operations by name and semantics.
+  The docs state paid MCP tools exist but do not enumerate them; every unmapped REST operation
+  is listed under rest_only until the connector is publishable/introspectable.
+surfaces:
+  openapi: openapi/seshat-markets-kronos-quant-signal-api-openapi.json
+  mcp: null
+  mcp_note: local-stdio only (kronos-mcp, unpublished on npm as of 2026-09-05); no hosted MCP endpoint
+  a2a: https://kronos.seshat.markets/a2a
+crosswalk:
+- tool: kronos_catalog
+  category: discovery
+  rest:
+  - getKronosCatalog
+  binding: GET /feeds/kronos/catalog
+  confidence: high
+  note: Docs describe the tool as returning the same catalog payload as the free REST endpoint.
+- tool: kronos_sample
+  category: testing
+  rest:
+  - getKronosSample
+  binding: GET /feeds/kronos/sample/btc_usdt
+  confidence: high
+- tool: kronos_risk
+  category: risk
+  rest:
+  - getKronosRisk
+  binding: GET /feeds/kronos/risk
+  confidence: high
+mcp_only: []
+rest_only:
+- kronos_accuracy_preview
+- getKronosAccuracy
+- kronos_accuracy_candles
+- kronos_accuracy_candles_preview
+- kronos_conviction_signals
+- kronos_risk_history
+- getKronosPrediction
+- getKronosDecision
+- getKronosDecisions
+- getForecastEvolution
+- getKronosForecastDistribution
+- getHistoricalAnalogs
+- getKronosRegime
+- getKronosAgentTrackRecord
+- getKronosAgentVotes
+- getKronosAgentSignals
+- kronos_composite_preview
+- getKronosComposite
+- kronos_confluence
+- kronos_benchmark_preview
+- kronos_benchmark
+- kronos_digest
+- kronos_market_brief
+- similar_markets_text
+- similar_markets_outcome_stats
+- behavioral_correlations
+- rationale_novelty
+- kronos_market_context
+- runKronosPlayground
+coverage:
+  openapi_operations: 32
+  mcp_tools_documented: 3
+  mapped: 3
+  rest_only: 29

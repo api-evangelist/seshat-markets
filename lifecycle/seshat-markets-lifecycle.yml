@@ -1,0 +1,26 @@
+generated: '2026-09-05'
+method: searched
+source: https://kronos.seshat.markets/docs
+versioning:
+  api_version: 2.1.0
+  scheme: >-
+    Unversioned URL surface (/api/feeds/kronos/...) with the contract versioned in the
+    OpenAPI (info.version 2.1.0) and registry.json (version 2.1, model production-v1).
+    No /v1-style path versioning and no documented versioning or deprecation policy.
+deprecation_policy: null
+deprecation_note: No deprecation policy, Sunset/Deprecation headers, or deprecated operations are published; the OpenAPI marks nothing deprecated.
+status_page:
+  url: https://seshat.markets/status.html
+  status: 200
+  note: System Status page on the parent seshat.markets host, linked from the Kronos footer. Probed live 2026-09-05.
+operational_signal:
+  url: https://kronos.seshat.markets/api/feeds/kronos/risk
+  note: >-
+    The free /risk endpoint is the machine-readable operational-status surface - docs direct
+    clients to it on 503 kronos_disabled, making it a live health signal alongside the human
+    status page.
+sla: null
+sla_note: >-
+  No SLA is published. The closest commitment is the refunds policy: full manual refund
+  within 5 business days for 5xx after upfront settlement, and 48-hour response on security
+  disclosures.

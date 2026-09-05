@@ -1,0 +1,123 @@
+# Kronos Quant Signal
+
+> Seshat Kronos provides auditable crypto forecasts for research and agent decision support. It is not financial advice.
+
+Prefer the JSON API over scraping `/kronos.html`.
+
+## Discovery
+
+- Landing page: `/kronos.html`
+- Catalog and examples: `/api/feeds/kronos/catalog`
+- Free real sample: `/api/feeds/kronos/sample/btc_usdt`
+- Registry: `/kronos/registry.json`
+- OpenAPI: `/kronos/openapi.json`
+- Agent quickstart: `/kronos/skill.md`
+- x402 manifest: `/.well-known/x402`
+
+## Payment status
+
+x402 is **active on mainnet** (Solana mainnet + Base mainnet) via the PayAI facilitator. Paid endpoints return a 402 challenge with exact `accepts` requirements. Real USDC payments are settled on-chain. See `/.well-known/x402` for the full manifest.
+
+## Data policy
+
+- `catalog`: Entry point for agents. Returns supported symbols, timeframes, cache TTLs, model config, and the full product catalog with x402 pricing per endpoint.
+- `sample/btc_usdt`: Real BTC model output, all 5 timeframes. Per-timeframe scaled delay: 5m→2h, 15m→6h, 1h→24h, 4h→48h, 1d→72h. No friction, no wallet. For integration testing.
+- `accuracy-preview/{symbolKey}`: Free preview of accuracy and calibration stats for a single symbol — headline metrics only.
+- `accuracy`: Model accuracy — measures the Kronos forecast model (predicted direction vs actual price at horizon). Total predictions, correct calls, hit rate, avg Brier score, calibration status, forecast coverage, baselines (edge vs no-change/momentum) and risk_state. Filter by ?symbol and ?limit; x402 price $0.001 USDC.
+- `accuracy/candles`: Per-timeframe candle-level audit — MAPE and MAE broken down by 5m, 15m, 1h, 4h, 1d. From 47k+ audited candles. Filter by ?symbol; x402 price $0.005 USDC.
+- `accuracy/candles-preview`: Free preview of the per-timeframe candle audit — aggregate only, rounded to 1 decimal.
+- `conviction-signals`: Free delayed conviction signals — top 3 non-BTC symbols ranked by prediction strength, from before today.
+- `risk`: Current operational risk state; standalone endpoint.
+- `risk/history`: Historical streak analytics — best and worst streaks ever (global, per symbol and per timeframe) with date ranges. Covers all audited decisions from the default preset; x402 price $0.020 USDC.
+- `predict/{symbolKey}`: Fresh on-demand forecast for any supported asset (BTC, ETH, SOL, etc). All timeframes by default, or filter with ?timeframes=5m,1h. $0.01 per timeframe, capped at $0.04 (20% off when requesting all 5). ?refresh=true forces GPU inference (bypasses cache) at 2x price ($0.02/TF, cap $0.08). Horizon: 5m→6h, 15m→24h, 1h→2d, 4h→10d, 1d→14d; x402 price $0.010 USDC.
+- `decision/{decisionId}`: One auditable decision record — full prediction, audit status, forecast bounds, Brier score and pred_candles. Free, rate-limited (30 req/5min).
+- `decisions`: Browse recent predictions ordered by most recent first. Filter with ?symbol=btc_usdt, ?status=audited|auditing|pending, ?days=30, ?limit=50 (max 100, max 20 with ?detail=1). Use ?detail=1 to include full pred_candles arrays (default: stripped — use /decision/:id for single full detail). Without ?status, returns most recent decisions regardless of audit state (audit fields null for pending); x402 price $0.001 USDC.
+- `forecast-evolution/{symbolKey}`: How the forecast for a symbol has changed over time: direction flips, confidence drift, upside_prob evolution, forecast range revision, and audited accuracy of each revision. Each revision includes market_key (e.g. btc-10m, btc-1h, or null for background scheduler) and timeframes. ?hours=24 (max 168), ?market_key=btc-10m to filter by market, ?limit=144 (max 1000), ?summary=1 for summary-only; x402 price $0.005 USDC.
+- `forecast-distribution/{symbolKey}`: Full sample distribution from Kronos probabilistic inference. Returns percentiles (p05, p10, p25, p50, p75, p90, p95) at each prediction step, plus final return distribution. $0.01 per timeframe, capped at $0.04 (20% off when requesting all 5). ?timeframes=5m,1h (defaults to 5m); x402 price $0.010 USDC.
+- `historical-analogs/{symbolKey}`: Past situations similar to the current forecast and what happened; x402 price $0.010 USDC.
+- `regime`: Cross-symbol alignment signal — market regime detection; x402 price $0.020 USDC.
+- `agent/track-record`: Agent track record — measures Kronos as a market voter (option voted vs market outcome): win rate, Brier score, per-coin breakdown; x402 price $0.001 USDC.
+- `agent/votes`: Recent votes by the Kronos agent with market context; x402 price $0.003 USDC.
+- `agent/signals`: Open markets for Kronos-covered coins with vote status; x402 price $0.005 USDC.
+- `composite-preview/{symbolKey}`: Free preview of the Quant vs Crowd divergence signal.
+- `composite/{symbolKey}`: Quant (Kronos) vs Crowd divergence analysis; x402 price $0.010 USDC.
+- `confluence/{symbolKey}`: Kronos confluence — quant vs sentiment vs crowd tags; x402 price $0.010 USDC.
+- `benchmark-preview`: Free preview of the Kronos benchmark leaderboard — fixed 7-day window, no per-coin detail.
+- `benchmark`: Kronos vs every forecasting agent — leaderboard with accuracy and Brier score; x402 price $0.020 USDC.
+- `digest/{symbolKey}`: AI-powered cross-referenced digest — combines 7 data sources into insight-driven analysis; x402 price $0.030 USDC.
+- `market-brief/{symbolKey}`: AI-powered external crypto narrative with source-backed news, sentiment, events and Kronos alignment; x402 price $0.050 USDC.
+- `/api/feeds/similar-markets`: Semantic similar markets by text query — embeds arbitrary text and finds the closest resolved markets via pgvector HNSW index; x402 price $0.005 USDC.
+- `/api/feeds/similar-markets/outcome-stats`: Outcome distribution of historically similar markets — the core B2B semantic search product; x402 price $0.010 USDC.
+- `/api/feeds/agent-intelligence/behavioral-correlations`: Semantic (behavioral) correlation between agents — how similarly they reason, not just how they vote; x402 price $0.010 USDC.
+- `/api/feeds/agent-intelligence/rationale-novelty`: Rationale novelty detection — flags agents recycling templated reasoning vs genuine per-market analysis; x402 price $0.010 USDC.
+- `market-context/{symbolKey}`: Multi-asset market context — cross-venue (Binance/OKX/Gate) funding, open interest, basis, liquidations, options IV and Kronos context. Gate on-demand discovery for crypto, stocks, forex, metals, commodities and indices; x402 price $0.030 USDC.
+- `playground/{symbolKey}`: Custom GPU inference with adjustable temperature, top_p, and sample_count. Price scales with sample_count: $0.005 per 20 samples. Rate-limited 3/5min per IP and per payer wallet; x402 price $0.005 USDC.
+
+## Recommended workflow
+
+1. Call `/api/feeds/kronos/catalog`.
+2. Use `/api/feeds/kronos/sample/btc_usdt` to validate parsing without a wallet.
+3. Use `/api/feeds/kronos/predict/{symbolKey}` for a fresh consensus when the agent needs new computation.
+4. Use `/api/feeds/kronos/forecast-distribution/{symbolKey}` for the full probabilistic distribution (percentiles, VaR).
+5. Use `/api/feeds/kronos/accuracy`, `/risk`, `/decision/{decisionId}` for verification and context.
+6. Use `/api/feeds/kronos/digest/{symbolKey}` to get a cross-referenced analysis saving 6 paid calls.
+
+## Important semantics
+
+`predict` is a fresh on-demand product. Concurrent requests for the same symbol/timeframe window share one GPU run and the resulting decision. Failed requests are not charged. The public page displays only the delayed BTC sample; other assets are not fetched as free live data. Historical predictions are available via `/decisions` (with full prediction output) and `/decision/{id}`.
+
+Paid endpoints use the `upfront` flow (predict, forecast-distribution, market-brief, playground) or the `authorization` flow (all others). Upfront settles payment BEFORE the GPU handler runs to avoid Solana blockhash expiry on long-running inference (>30s). Both EVM (EIP-3009, Permit2) and Solana (exact SVM) schemes are supported.
+
+## Response schema
+
+Forecast endpoints (`/sample/btc_usdt`, `/predict/{symbolKey}`) share one response shape, defined as `KronosForecastResponse` in the OpenAPI spec:
+
+- `pair` (string): exchange pair, e.g. `BTCUSDT`.
+- `timestamp` (ISO 8601): response generation time.
+- `timeframes` (object): map of timeframe key (`5m`, `15m`, `1h`, `4h`, `1d`) to per-timeframe result with `direction`, `current_price`, `predicted_price`, `pred_len`, `pred_max`, `pred_min`, `change_pct`, `upside_prob`, `elapsed_s` and `pred_candles` (array of `[open, high, low, close]`).
+- `consensus` (object): aggregate reading with `direction` (`LONG`/`SHORT`/`NEUTRAL`), `confidence`, `upside_prob_avg`, `total_timeframes`, `agreeing_timeframes`.
+- `forecast` (object): conformal calibrated range with `low`, `high`, `coverage`, `predicted_at`, `method`.
+- `sample` (boolean, only on the free delayed BTC sample): `true`.
+- `sample_policy` (object, only on the sample): `{ symbol, delay_minutes, realtime: false }`.
+
+## Example
+
+```javascript
+const base = 'https://kronos.seshat.markets';
+const catalog = await fetch(`${base}/api/feeds/kronos/catalog`).then(r => r.json());
+const sample = await fetch(`${base}/api/feeds/kronos/sample/btc_usdt`).then(r => r.json());
+
+// Paid endpoint — handle 402 challenge
+const resp = await fetch(`${base}/api/feeds/kronos/predict/btc_usdt?timeframes=1h`);
+if (resp.status === 402) {
+  // Parse the x402 challenge, sign payment, and retry with X-PAYMENT header
+  const challenge = await resp.json();
+  // ... sign per the accepts requirements in /.well-known/x402
+  throw new Error('Payment required — see challenge');
+}
+const fresh = await resp.json();
+```
+
+## Python example
+
+```python
+# pip install x402-requests
+from x402.requests import wrap_requests_with_payment
+import os
+
+session = wrap_requests_with_payment(os.environ["BUYER_PRIVATE_KEY"])
+response = session.get("https://kronos.seshat.markets/api/feeds/kronos/predict/btc_usdt",
+                       params={"timeframes": "1h"})
+forecast = response.json()
+print(forecast["consensus"]["direction"])
+```
+
+## Error catalog
+
+- **402 `payment_required`**: Paid endpoint without payment. Response body has x402 challenge (price, accepts, payTo). Sign payment, retry with `X-PAYMENT` + `X-REQUEST-ID` headers.
+- **429 `rate_limited`**: Too many requests. Per-endpoint limits (predict: 10/min IP, 20/min wallet; refresh: 2/min IP; playground: 3/5min; decision: 30/5min). Back off; use cached responses.
+- **503 `kronos_disabled`**: Service disabled. Retry later; check `/risk` (free) for status.
+- **503 `forecast_unavailable`**: Not enough candle data for symbol. Try another symbol or wait.
+- **500 `kronos_error`**: Internal error. For upfront-flow endpoints, response includes `retry_token` (one-time, 1h TTL, send in `X-Retry-Token` header) and `refund_reference` (tx hash for refund). Authorization-flow endpoints only settle on 2xx — no refund needed.
+- **404 `unknown_symbol`**: Symbol not in catalog. Check `/catalog` for supported symbols.
+- **400 `missing_*` / `invalid_*`**: Missing or invalid parameter. Fix and retry; no payment charged for 400s.
