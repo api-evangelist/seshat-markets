@@ -1,0 +1,66 @@
+name: Seshat Markets
+description: A public, keyless, agent-native quantitative forecasting API by Seshat providing multi-timeframe price-path
+  forecasts, market/risk context, accuracy audits, and agent-intelligence signals for crypto, commodities, and pre-market
+  equities. Authenticated entirely via x402 USDC micropayments on Solana and Base mainnet, with no API keys or subscriptions.
+url: https://raw.githubusercontent.com/api-evangelist/seshat-markets/refs/heads/main/apis.yml
+created: '2026-09-05'
+modified: '2026-09-05'
+specificationVersion: '0.21'
+tags:
+- finance
+- fintech
+- crypto
+- commodities
+- forecasting
+- prediction
+- market-data
+- trading-signals
+- research
+- ai-agents
+- mcp
+- a2a
+- x402
+- llms-txt
+- agent-skills
+apis:
+- name: Kronos Quant Signal REST API
+  description: Live REST/JSON API with 32 endpoints for price-path forecasting, market/risk context, accuracy audits,
+    and agent signals. Several endpoints are free; the rest are paid per-request via x402 USDC micropayments. Includes
+    a published OpenAPI 3.1 contract, llms.txt, and an agent skill.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - finance
+  - fintech
+  - crypto
+  - commodities
+  - forecasting
+  - prediction
+  - market-data
+  - trading-signals
+  - research
+  - ai-agents
+  - mcp
+  - a2a
+  - x402
+  - llms-txt
+  - agent-skills
+  properties:
+  - type: OpenAPI
+    url: https://kronos.seshat.markets/openapi.json
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/kronos/llms.txt
+  - type: AgentSkill
+    url: https://kronos.seshat.markets/kronos/skill.md
+maintainers:
+- FN: Seshat (Seshat Oracle)
+  url: https://kronos.seshat.markets
+x-source:
+  via: apis.io/add 4493d5b6, parked unverifiable_host; approved after the spec hunt
+  fetched: '2026-09-05'
+  note: The declared spec path /api/openapi.json 404s; the real 83KB OpenAPI is at /openapi.json and the pointer
+    above was corrected to it. Slugged to the registrable domain seshat.markets (Kronos is the product on a subdomain;
+    "kronos" alone collides with the workforce-software legacy brand). The root host soft-200s but /api/* discriminates
+    -- control 404s at 155b.
