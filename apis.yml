@@ -8,6 +8,22 @@ created: '2026-09-05'
 modified: '2026-09-05'
 specificationVersion: '0.21'
 tags:
+- Finance
+- Fintech
+- Crypto
+- Commodities
+- Forecasting
+- Prediction
+- Market Data
+- trading-signals
+- Research
+- AI Agents
+- MCP
+- A2A
+- x402
+- llms-txt
+- Agent Skills
+tags_raw:
 - finance
 - fintech
 - crypto
@@ -24,42 +40,22 @@ tags:
 - llms-txt
 - agent-skills
 apis:
-- name: Kronos Quant Signal REST API
-  description: Live REST/JSON API with 32 endpoints for price-path forecasting, market/risk context, accuracy audits,
-    and agent signals. Several endpoints are free; the rest are paid per-request via x402 USDC micropayments. Includes
-    a published OpenAPI 3.1 contract, llms.txt, and an agent skill.
-  image: https://kronos.seshat.markets/assets/kronos-seshat-logo.webp
+- aid: seshat-markets:seshat-markets-agent-api
+  name: Seshat Markets Agent API
+  description: The Agent API from Seshat Markets — 7 operation(s) for agent.
   humanURL: https://kronos.seshat.markets/api
   baseURL: https://kronos.seshat.markets/api
   tags:
-  - finance
-  - fintech
-  - crypto
-  - commodities
-  - forecasting
-  - prediction
-  - market-data
-  - trading-signals
-  - research
-  - ai-agents
-  - mcp
-  - a2a
-  - x402
-  - llms-txt
-  - agent-skills
+  - Agent
   properties:
   - type: OpenAPI
-    url: openapi/seshat-markets-kronos-quant-signal-api-openapi.json
+    url: openapi/seshat-markets-agent-api-openapi.yml
   - type: Documentation
     url: https://kronos.seshat.markets/docs
   - type: APIReference
     url: https://kronos.seshat.markets/api
   - type: LLMsTxt
     url: https://kronos.seshat.markets/llms.txt
-  - type: AgentSkill
-    url: https://kronos.seshat.markets/kronos/skill.md
-  - type: MCPServer
-    url: mcp/seshat-markets-mcp.yml
   - type: ToolCrosswalk
     url: mcp/seshat-markets-tool-crosswalk.yml
   - type: AgentCard
@@ -68,8 +64,242 @@ apis:
     url: errors/seshat-markets-problem-types.yml
   - type: DataModel
     url: data-model/seshat-markets-data-model.yml
-  - type: Overlay
-    url: overlays/seshat-markets-kronos-overlay.yaml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-agent-intelligence-api
+  name: Seshat Markets Agent Intelligence API
+  description: The Agent Intelligence API from Seshat Markets — 2 operation(s) for agent intelligence.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Agent Intelligence
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-agent-intelligence-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-analysis-api
+  name: Seshat Markets Analysis API
+  description: The Analysis API from Seshat Markets — 8 operation(s) for analysis.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Analysis
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-analysis-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-discovery-api
+  name: Seshat Markets Discovery API
+  description: The Discovery API from Seshat Markets — 2 operation(s) for discovery.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Discovery
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-discovery-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-experimental-api
+  name: Seshat Markets Experimental API
+  description: The Experimental API from Seshat Markets — 1 operation(s) for experimental.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Experimental
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-experimental-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-forecast-api
+  name: Seshat Markets Forecast API
+  description: The Forecast API from Seshat Markets — 4 operation(s) for forecast.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Forecast
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-forecast-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-market-intelligence-api
+  name: Seshat Markets Market Intelligence API
+  description: >-
+    The Market Intelligence API from Seshat Markets — 2 operation(s) for market intelligence.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Market Intelligence
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-market-intelligence-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-semantic-similarity-api
+  name: Seshat Markets Semantic Similarity API
+  description: >-
+    The Semantic Similarity API from Seshat Markets — 2 operation(s) for semantic similarity.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Semantic Similarity
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-semantic-similarity-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-signal-api
+  name: Seshat Markets Signal API
+  description: The Signal API from Seshat Markets — 1 operation(s) for signal.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Signal
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-signal-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
+  - type: Sandbox
+    url: sandbox/seshat-markets-sandbox.yml
+- aid: seshat-markets:seshat-markets-verification-api
+  name: Seshat Markets Verification API
+  description: The Verification API from Seshat Markets — 3 operation(s) for verification.
+  humanURL: https://kronos.seshat.markets/api
+  baseURL: https://kronos.seshat.markets/api
+  tags:
+  - Verification
+  properties:
+  - type: OpenAPI
+    url: openapi/seshat-markets-verification-api-openapi.yml
+  - type: Documentation
+    url: https://kronos.seshat.markets/docs
+  - type: APIReference
+    url: https://kronos.seshat.markets/api
+  - type: LLMsTxt
+    url: https://kronos.seshat.markets/llms.txt
+  - type: ToolCrosswalk
+    url: mcp/seshat-markets-tool-crosswalk.yml
+  - type: AgentCard
+    url: a2a/seshat-markets-a2a.yml
+  - type: ErrorCatalog
+    url: errors/seshat-markets-problem-types.yml
+  - type: DataModel
+    url: data-model/seshat-markets-data-model.yml
   - type: Sandbox
     url: sandbox/seshat-markets-sandbox.yml
 maintainers:
@@ -89,6 +319,10 @@ x-source:
     "kronos" alone collides with the workforce-software legacy brand). The root host soft-200s but /api/* discriminates
     -- control 404s at 155b.
 common:
+- type: AgentSkill
+  url: https://kronos.seshat.markets/kronos/skill.md
+- type: Overlay
+  url: overlays/seshat-markets-kronos-overlay.yaml
 - type: Website
   url: https://seshat.markets
 - type: VulnerabilityDisclosure
