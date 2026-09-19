@@ -13,7 +13,7 @@ tags:
 - Crypto
 - Commodities
 - Forecasting
-- Prediction
+- Predictions
 - Market Data
 - trading-signals
 - Research
@@ -46,6 +46,8 @@ apis:
   humanURL: https://kronos.seshat.markets/api
   baseURL: https://kronos.seshat.markets/api
   tags:
+  - Agents
+  tags_raw:
   - Agent
   properties:
   - type: OpenAPI
