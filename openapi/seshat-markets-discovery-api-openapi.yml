@@ -1,0 +1,189 @@
+openapi: 3.2.0
+info:
+  title: Kronos Quant Signal Discovery API
+  version: 2.1.0
+  summary: Auditable multi-asset financial forecasts for agents
+  description: Kronos publishes cached multi-timeframe forecasts across crypto, commodities, and pre-market equities. Includes calibrated ranges, risk context, auditable decision records, and cross-symbol regime detection. Research and decision support only; not financial advice. x402 payments are active on mainnet (Solana mainnet + Base mainnet) via the PayAI facilitator. See /.well-known/x402 for exact requirements.
+  termsOfService: https://kronos.seshat.markets/
+  x-guidance: Use the catalog first, prefer cached reads, cite generated_at/decision_id, and verify outcomes through the audit record. Do not treat directional context as a standalone trading instruction.
+  x-disclaimer: Kronos is a quantitative research signal, not investment advice. Forecasts are for research and integration purposes only. Always do your own research.
+servers:
+- url: https://kronos.seshat.markets/api
+  description: Kronos production API
+tags:
+- name: Discovery
+paths:
+  /feeds/kronos/catalog:
+    get:
+      operationId: getKronosCatalog
+      tags:
+      - Discovery
+      summary: GET /catalog
+      description: The first call an agent should make. Returns all supported symbols, timeframes, per-timeframe cache TTLs, model config, and the complete product catalog — every endpoint with its x402 price, data policy and description.
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+  /feeds/kronos/sample/btc_usdt:
+    get:
+      operationId: getKronosSample
+      tags:
+      - Discovery
+      summary: GET /sample/btc_usdt
+      description: 'Real BTC model output, all 5 timeframes. The delay is scaled per timeframe: 5m→2h, 15m→6h, 1h→24h, 4h→48h, 1d→72h. No friction, no wallet. For integration testing.'
+      responses:
+        '200':
+          description: Kronos forecast response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KronosForecastResponse'
+        '404':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    KronosSamplePolicy:
+      type: object
+      properties:
+        symbol:
+          type: string
+        delay_minutes:
+          type: integer
+        realtime:
+          type: boolean
+    KronosTimeframeResult:
+      type: object
+      properties:
+        pred_len:
+          type: integer
+        pred_max:
+          type: number
+        pred_min:
+          type: number
+        direction:
+          type: string
+          enum:
+          - LONG
+          - SHORT
+          - NEUTRAL
+        elapsed_s:
+          type: number
+        change_pct:
+          type: number
+        upside_prob:
+          type: number
+        pred_candles:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 4
+            maxItems: 4
+        current_price:
+          type: number
+        predicted_price:
+          type: number
+      required:
+      - direction
+      - current_price
+      - predicted_price
+    KronosForecast:
+      type: object
+      description: Conformal calibrated price range.
+      properties:
+        low:
+          type: number
+        high:
+          type: number
+        coverage:
+          type: number
+        predicted_at:
+          type: string
+          format: date-time
+        method:
+          type: string
+          enum:
+          - dynamic_calibration
+          - default_widening
+      required:
+      - low
+      - high
+      - coverage
+    KronosConsensus:
+      type: object
+      description: Aggregate directional reading across the requested timeframes.
+      properties:
+        direction:
+          type: string
+          enum:
+          - LONG
+          - SHORT
+          - NEUTRAL
+        confidence:
+          type: number
+          description: 0-1 agreement strength across timeframes.
+        upside_prob_avg:
+          type: number
+          description: Average upside probability across timeframes (0-100).
+        total_timeframes:
+          type: integer
+        agreeing_timeframes:
+          type: integer
+      required:
+      - direction
+      - total_timeframes
+      - agreeing_timeframes
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+    KronosForecastResponse:
+      type: object
+      description: Kronos forecast response shared by /sample and /predict endpoints.
+      properties:
+        pair:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        timeframes:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/KronosTimeframeResult'
+        consensus:
+          $ref: '#/components/schemas/KronosConsensus'
+        forecast:
+          $ref: '#/components/schemas/KronosForecast'
+        sample:
+          type: boolean
+        sample_policy:
+          $ref: '#/components/schemas/KronosSamplePolicy'
+      required:
+      - pair
+      - timestamp
+      - timeframes
+      - consensus
+  securitySchemes:
+    x402Payment:
+      type: apiKey
+      in: header
+      name: PAYMENT-SIGNATURE
+      description: x402 v2 payment payload. Required for paid endpoints when the service manifest at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+externalDocs:
+  description: Kronos agent quickstart
+  url: https://kronos.seshat.markets/kronos/skill.md
+x-discovery:
+  llms_txt: https://kronos.seshat.markets/kronos/llms.txt
+  registry: https://kronos.seshat.markets/kronos/registry.json
+  x402: https://kronos.seshat.markets/.well-known/x402

@@ -1,0 +1,137 @@
+openapi: 3.2.0
+info:
+  title: Kronos Quant Signal Semantic Similarity API
+  version: 2.1.0
+  summary: Auditable multi-asset financial forecasts for agents
+  description: Kronos publishes cached multi-timeframe forecasts across crypto, commodities, and pre-market equities. Includes calibrated ranges, risk context, auditable decision records, and cross-symbol regime detection. Research and decision support only; not financial advice. x402 payments are active on mainnet (Solana mainnet + Base mainnet) via the PayAI facilitator. See /.well-known/x402 for exact requirements.
+  termsOfService: https://kronos.seshat.markets/
+  x-guidance: Use the catalog first, prefer cached reads, cite generated_at/decision_id, and verify outcomes through the audit record. Do not treat directional context as a standalone trading instruction.
+  x-disclaimer: Kronos is a quantitative research signal, not investment advice. Forecasts are for research and integration purposes only. Always do your own research.
+servers:
+- url: https://kronos.seshat.markets/api
+  description: Kronos production API
+tags:
+- name: Semantic Similarity
+paths:
+  /feeds/similar-markets:
+    get:
+      operationId: similar_markets_text
+      tags:
+      - Semantic Similarity
+      summary: GET /feeds/similar-markets
+      description: Semantic market discovery by text query. Embeds arbitrary text (for example, an open market question) and returns the closest resolved instance from each distinct market template via pgvector cosine search. Results are automatically isolated to the domain of the closest match (crypto, commodity, equity, forex, aviation, environment, space, maritime, and so on), so financial markets are never mixed with flights, pollution or unrelated domains. Embeddings include title, asset, market type, duration, and available sentiment/news; the resolved outcome is deliberately excluded from the embedding to prevent answer leakage. winnerLabel is the outcome of the representative returned instance, not a historical probability. Use ?domain, ?coin and ?kind for explicit comparability, or /feeds/similar-markets/outcome-stats for an aggregated historical outcome distribution.
+      parameters:
+      - name: text
+        in: query
+        required: true
+        schema:
+          type: string
+          maxLength: 2000
+        description: Market question or arbitrary text to find similar resolved markets
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 50
+        description: Max similar markets to return (default 10, max 50)
+      - name: coin
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 20
+        description: Filter by coin_id (e.g. bitcoin)
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Filter by market kind (short, yesno, ath, milestone, range)
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.005000'
+  /feeds/similar-markets/outcome-stats:
+    get:
+      operationId: similar_markets_outcome_stats
+      tags:
+      - Semantic Similarity
+      summary: GET /feeds/similar-markets/outcome-stats
+      description: Outcome aggregation — the core B2B semantic search product. Given a market question (text) or instance ID, finds comparable resolved markets and returns their outcome distribution (for example, '62% Up, 38% Down across 50 similar markets'). Domain isolation is automatic, and coin plus market kind are inferred when omitted, preventing incompatible outcomes from financial, aviation, environment or other domains from being mixed. Includes sample sufficiency, similarity threshold, per-coin breakdown and top matches. Supports explicit ?domain, ?coin and ?kind filters.
+      parameters:
+      - name: text
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 2000
+        description: Market question text (alternative to instanceId)
+      - name: instanceId
+        in: query
+        required: false
+        schema:
+          type: integer
+        description: Market instance ID (alternative to text)
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+          maximum: 200
+        description: Max similar markets to aggregate (default 50, max 200)
+      - name: coin
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 20
+      - name: kind
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.010000'
+components:
+  securitySchemes:
+    x402Payment:
+      type: apiKey
+      in: header
+      name: PAYMENT-SIGNATURE
+      description: x402 v2 payment payload. Required for paid endpoints when the service manifest at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+externalDocs:
+  description: Kronos agent quickstart
+  url: https://kronos.seshat.markets/kronos/skill.md
+x-discovery:
+  llms_txt: https://kronos.seshat.markets/kronos/llms.txt
+  registry: https://kronos.seshat.markets/kronos/registry.json
+  x402: https://kronos.seshat.markets/.well-known/x402

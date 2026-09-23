@@ -1,0 +1,425 @@
+openapi: 3.2.0
+info:
+  title: Kronos Quant Signal Forecast API
+  version: 2.1.0
+  summary: Auditable multi-asset financial forecasts for agents
+  description: Kronos publishes cached multi-timeframe forecasts across crypto, commodities, and pre-market equities. Includes calibrated ranges, risk context, auditable decision records, and cross-symbol regime detection. Research and decision support only; not financial advice. x402 payments are active on mainnet (Solana mainnet + Base mainnet) via the PayAI facilitator. See /.well-known/x402 for exact requirements.
+  termsOfService: https://kronos.seshat.markets/
+  x-guidance: Use the catalog first, prefer cached reads, cite generated_at/decision_id, and verify outcomes through the audit record. Do not treat directional context as a standalone trading instruction.
+  x-disclaimer: Kronos is a quantitative research signal, not investment advice. Forecasts are for research and integration purposes only. Always do your own research.
+servers:
+- url: https://kronos.seshat.markets/api
+  description: Kronos production API
+tags:
+- name: Forecast
+paths:
+  /feeds/kronos/conviction-signals:
+    get:
+      operationId: kronos_conviction_signals
+      tags:
+      - Forecast
+      summary: GET /conviction-signals
+      description: 'Free public signal — the latest pre-midnight prediction per non-BTC symbol, ranked by conviction (distance of upside_prob from 50%), top 3. Delayed by design (cutoff: before today''s midnight) so it never undercuts the paid, fresh /predict and /decisions endpoints.'
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+  /feeds/kronos/predict/{symbolKey}:
+    get:
+      operationId: getKronosPrediction
+      tags:
+      - Forecast
+      summary: GET /predict/:symbol?timeframes=
+      description: 'Fresh on-demand forecast for any supported asset (BTC, ETH, SOL, etc). Returns all timeframes by default, or filter with ?timeframes=5m,1h. $0.01 per timeframe, capped at $0.04 (20% off when requesting all 5). ?refresh=true forces GPU inference (bypasses cache) at 2x price ($0.02/TF, cap $0.08), rate-limited to 2/min per IP and 3/5min per payer wallet. Horizon: 5m→6h, 15m→24h, 1h→2d, 4h→10d, 1d→14d.'
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.010000'
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        description: 'Kronos symbol key — on-demand discovery for any Gate.io symbol (crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt. On-demand examples: nvda_usdt, xauusd_usdt, eurusd_usdt, doge_usdt. Unknown symbols return 404 with available keys.'
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          maxLength: 50
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+      - name: timeframes
+        in: query
+        required: false
+        description: Comma-separated timeframes (5m, 15m, 1h, 4h, 1d). Defaults to all 5 for /predict, 5m for /forecast-distribution.
+        schema:
+          type: string
+          pattern: ^(5m|15m|1h|4h|1d)(,(5m|15m|1h|4h|1d))*$
+          maxLength: 20
+          example: 5m,15m,1h,4h,1d
+      responses:
+        '200':
+          description: Kronos forecast response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KronosForecastResponse'
+        '402':
+          description: x402 payment challenge. Returned by paid endpoints when no valid payment is provided. The response body contains x402Version and accepts[] with the exact payment requirements (network, asset, amount, payTo, scheme). See /.well-known/x402 for the full manifest.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  x402Version:
+                    type: integer
+                    const: 2
+                  accepts:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: No cached signal is available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Kronos is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /feeds/kronos/forecast-distribution/{symbolKey}:
+    get:
+      operationId: getKronosForecastDistribution
+      tags:
+      - Forecast
+      summary: GET /forecast-distribution/:symbol?timeframes=
+      description: 'Unlike /predict which returns the median-averaged prediction, this returns the full empirical distribution from sample_count independent inference paths. At each prediction step you get p05-p95 percentiles for close price, plus the final return percentile distribution. This is the true probabilistic output of Kronos — agents can use it to compute Value-at-Risk, confidence intervals, or any custom decision rule. Price scales with timeframes: $0.01 per TF, capped at $0.04 for all 5.'
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: dynamic
+          currency: USD
+          price_per_tf: '0.010000'
+          price_cap: '0.040000'
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        description: 'Kronos symbol key — on-demand discovery for any Gate.io symbol (crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt. On-demand examples: nvda_usdt, xauusd_usdt, eurusd_usdt, doge_usdt. Unknown symbols return 404 with available keys.'
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          maxLength: 50
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+      - name: timeframes
+        in: query
+        required: false
+        description: Comma-separated timeframes (5m, 15m, 1h, 4h, 1d). Defaults to all 5 for /predict, 5m for /forecast-distribution.
+        schema:
+          type: string
+          pattern: ^(5m|15m|1h|4h|1d)(,(5m|15m|1h|4h|1d))*$
+          maxLength: 20
+          example: 5m,15m,1h,4h,1d
+      responses:
+        '200':
+          description: Forecast distribution with percentiles per step
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pair:
+                    type: string
+                  as_of:
+                    type: string
+                    format: date-time
+                  generated_at:
+                    type: string
+                    format: date-time
+                  timeframes:
+                    type: object
+                    additionalProperties:
+                      type: object
+                      properties:
+                        current_price:
+                          type: number
+                        pred_len:
+                          type: integer
+                        sample_count:
+                          type: integer
+                        upside_prob:
+                          type: number
+                        as_of:
+                          type: string
+                        elapsed_s:
+                          type: number
+                        final_price:
+                          type: object
+                          properties:
+                            p05:
+                              type: number
+                            p10:
+                              type: number
+                            p25:
+                              type: number
+                            p50:
+                              type: number
+                            p75:
+                              type: number
+                            p90:
+                              type: number
+                            p95:
+                              type: number
+                        final_return_pct:
+                          type: object
+                          properties:
+                            p05:
+                              type: number
+                            p10:
+                              type: number
+                            p25:
+                              type: number
+                            p50:
+                              type: number
+                            p75:
+                              type: number
+                            p90:
+                              type: number
+                            p95:
+                              type: number
+                        per_step:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              step:
+                                type: integer
+                              p05:
+                                type: number
+                              p10:
+                                type: number
+                              p25:
+                                type: number
+                              p50:
+                                type: number
+                              p75:
+                                type: number
+                              p90:
+                                type: number
+                              p95:
+                                type: number
+        '402':
+          description: x402 payment challenge. Returned by paid endpoints when no valid payment is provided. The response body contains x402Version and accepts[] with the exact payment requirements (network, asset, amount, payTo, scheme). See /.well-known/x402 for the full manifest.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  x402Version:
+                    type: integer
+                    const: 2
+                  accepts:
+                    type: array
+                    items:
+                      type: object
+        '503':
+          description: Kronos is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /feeds/kronos/digest/{symbolKey}:
+    get:
+      operationId: kronos_digest
+      tags:
+      - Forecast
+      summary: GET /digest/:symbol
+      description: 'Combines 7 Kronos data sources (predict, risk, forecast-evolution, regime, historical-analogs, composite quant-vs-crowd, accuracy) into one insight-driven digest. An AI agent cross-references these to surface non-obvious insights: track-record reality checks (is the confidence justified by analogs?), timeframe contradictions, quant-vs-crowd divergences, calibration warnings, and risk context. Returns the text digest plus structured metadata (analog accuracy, model accuracy, crowd accuracy, live divergences). Saves the agent 6 paid calls ($0.06+). Priced at $0.03.'
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+        description: 'Kronos symbol key (on-demand discovery: any Gate.io symbol — crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt, bz_usdt, ng_usdt, xaut_usdt, xag_usdt, cl_usdt, openai_usdt, anthropic_usdt, nvdax_usdt, tslax_usdt, metax_usdt, eurusd_usdt, gbpusd_usdt. On-demand examples: nvda_usdt, tsla_usdt, doge_usdt, ada_usdt. Unknown symbols return 404 with available keys.'
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.030000'
+components:
+  schemas:
+    KronosSamplePolicy:
+      type: object
+      properties:
+        symbol:
+          type: string
+        delay_minutes:
+          type: integer
+        realtime:
+          type: boolean
+    KronosTimeframeResult:
+      type: object
+      properties:
+        pred_len:
+          type: integer
+        pred_max:
+          type: number
+        pred_min:
+          type: number
+        direction:
+          type: string
+          enum:
+          - LONG
+          - SHORT
+          - NEUTRAL
+        elapsed_s:
+          type: number
+        change_pct:
+          type: number
+        upside_prob:
+          type: number
+        pred_candles:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 4
+            maxItems: 4
+        current_price:
+          type: number
+        predicted_price:
+          type: number
+      required:
+      - direction
+      - current_price
+      - predicted_price
+    KronosForecast:
+      type: object
+      description: Conformal calibrated price range.
+      properties:
+        low:
+          type: number
+        high:
+          type: number
+        coverage:
+          type: number
+        predicted_at:
+          type: string
+          format: date-time
+        method:
+          type: string
+          enum:
+          - dynamic_calibration
+          - default_widening
+      required:
+      - low
+      - high
+      - coverage
+    KronosConsensus:
+      type: object
+      description: Aggregate directional reading across the requested timeframes.
+      properties:
+        direction:
+          type: string
+          enum:
+          - LONG
+          - SHORT
+          - NEUTRAL
+        confidence:
+          type: number
+          description: 0-1 agreement strength across timeframes.
+        upside_prob_avg:
+          type: number
+          description: Average upside probability across timeframes (0-100).
+        total_timeframes:
+          type: integer
+        agreeing_timeframes:
+          type: integer
+      required:
+      - direction
+      - total_timeframes
+      - agreeing_timeframes
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+    KronosForecastResponse:
+      type: object
+      description: Kronos forecast response shared by /sample and /predict endpoints.
+      properties:
+        pair:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        timeframes:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/KronosTimeframeResult'
+        consensus:
+          $ref: '#/components/schemas/KronosConsensus'
+        forecast:
+          $ref: '#/components/schemas/KronosForecast'
+        sample:
+          type: boolean
+        sample_policy:
+          $ref: '#/components/schemas/KronosSamplePolicy'
+      required:
+      - pair
+      - timestamp
+      - timeframes
+      - consensus
+  securitySchemes:
+    x402Payment:
+      type: apiKey
+      in: header
+      name: PAYMENT-SIGNATURE
+      description: x402 v2 payment payload. Required for paid endpoints when the service manifest at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+externalDocs:
+  description: Kronos agent quickstart
+  url: https://kronos.seshat.markets/kronos/skill.md
+x-discovery:
+  llms_txt: https://kronos.seshat.markets/kronos/llms.txt
+  registry: https://kronos.seshat.markets/kronos/registry.json
+  x402: https://kronos.seshat.markets/.well-known/x402

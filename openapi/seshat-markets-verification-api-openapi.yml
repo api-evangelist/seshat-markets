@@ -1,0 +1,178 @@
+openapi: 3.2.0
+info:
+  title: Kronos Quant Signal Verification API
+  version: 2.1.0
+  summary: Auditable multi-asset financial forecasts for agents
+  description: Kronos publishes cached multi-timeframe forecasts across crypto, commodities, and pre-market equities. Includes calibrated ranges, risk context, auditable decision records, and cross-symbol regime detection. Research and decision support only; not financial advice. x402 payments are active on mainnet (Solana mainnet + Base mainnet) via the PayAI facilitator. See /.well-known/x402 for exact requirements.
+  termsOfService: https://kronos.seshat.markets/
+  x-guidance: Use the catalog first, prefer cached reads, cite generated_at/decision_id, and verify outcomes through the audit record. Do not treat directional context as a standalone trading instruction.
+  x-disclaimer: Kronos is a quantitative research signal, not investment advice. Forecasts are for research and integration purposes only. Always do your own research.
+servers:
+- url: https://kronos.seshat.markets/api
+  description: Kronos production API
+tags:
+- name: Verification
+paths:
+  /feeds/kronos/accuracy:
+    get:
+      operationId: getKronosAccuracy
+      tags:
+      - Verification
+      summary: GET /accuracy
+      parameters:
+      - name: symbol
+        in: query
+        required: false
+        description: Filter by Kronos symbol key (e.g. btc_usdt). Same on-demand discovery as path symbolKey.
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          maxLength: 50
+          example: btc_usdt
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 100
+          minimum: 1
+          maximum: 1000
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: Model accuracy report — measures the Kronos forecast model (predicted direction vs actual price at horizon). Total predictions, correct calls, hit rate, avg Brier score, calibration status, forecast coverage (conformal interval containment), baselines (no-change/momentum accuracy + edge vs best baseline) and current risk_state. Per-timeframe candle-level audit (MAPE/MAE) is available via /accuracy/candles. Filter by ?symbol and ?limit. Not the same as /agent/track-record, which measures Kronos as a market voter (option voted vs market outcome).
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.001000'
+  /feeds/kronos/decision/{decisionId}:
+    get:
+      operationId: getKronosDecision
+      tags:
+      - Verification
+      summary: GET /decision/:id
+      parameters:
+      - name: decisionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the decision to retrieve (from /predict response or /decisions list).
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      description: Retrieve a single past decision by its UUID. Returns the full prediction, audit status, forecast bounds, Brier score and pred_candles — everything you need to verify or replay a call. Free, rate-limited (30 req/5min).
+  /feeds/kronos/decisions:
+    get:
+      operationId: getKronosDecisions
+      tags:
+      - Verification
+      summary: GET /decisions
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          maximum: 100
+        description: Number of decisions to return (max 100, max 20 with detail=1).
+      - name: symbol
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 50
+        description: Filter by symbol key (e.g. btc_usdt)
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - audited
+          - auditing
+          - pending
+        description: 'Filter by audit status: audited (has outcome + Brier score), auditing (candle audit in progress), pending (not yet audited).'
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 365
+        description: Lookback window in days (e.g. days=30 for last 30 days).
+      - name: detail
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - '0'
+          - '1'
+          - 'true'
+          - 'false'
+        description: 'Set to 1 or true to include full pred_candles arrays (48-60 OHLC candles per timeframe). Default: stripped to reduce payload size — use /decision/{id} for full detail on a single decision.'
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      description: 'Browse recent predictions — each with decision ID, symbol, consensus, audit status, Brier score and per-timeframe summary (direction, change_pct, ranges). Results are ordered by predicted_at DESC (most recent first). Use ?detail=1 to include full pred_candles arrays (default: stripped — use /decision/:id for single full detail). Filter by ?symbol (e.g. btc_usdt), ?status (audited/auditing/pending), ?days (lookback), ?limit (max 100, max 20 with ?detail=1 — pred_candles are ~2KB/tf so detail responses are capped lower to prevent resource exhaustion). Without ?status, returns the most recent decisions regardless of audit state (audit fields will be null for pending decisions).'
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.001000'
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+  securitySchemes:
+    x402Payment:
+      type: apiKey
+      in: header
+      name: PAYMENT-SIGNATURE
+      description: x402 v2 payment payload. Required for paid endpoints when the service manifest at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+externalDocs:
+  description: Kronos agent quickstart
+  url: https://kronos.seshat.markets/kronos/skill.md
+x-discovery:
+  llms_txt: https://kronos.seshat.markets/kronos/llms.txt
+  registry: https://kronos.seshat.markets/kronos/registry.json
+  x402: https://kronos.seshat.markets/.well-known/x402

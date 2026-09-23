@@ -1,0 +1,141 @@
+openapi: 3.2.0
+info:
+  title: Kronos Quant Signal Experimental API
+  version: 2.1.0
+  summary: Auditable multi-asset financial forecasts for agents
+  description: Kronos publishes cached multi-timeframe forecasts across crypto, commodities, and pre-market equities. Includes calibrated ranges, risk context, auditable decision records, and cross-symbol regime detection. Research and decision support only; not financial advice. x402 payments are active on mainnet (Solana mainnet + Base mainnet) via the PayAI facilitator. See /.well-known/x402 for exact requirements.
+  termsOfService: https://kronos.seshat.markets/
+  x-guidance: Use the catalog first, prefer cached reads, cite generated_at/decision_id, and verify outcomes through the audit record. Do not treat directional context as a standalone trading instruction.
+  x-disclaimer: Kronos is a quantitative research signal, not investment advice. Forecasts are for research and integration purposes only. Always do your own research.
+servers:
+- url: https://kronos.seshat.markets/api
+  description: Kronos production API
+tags:
+- name: Experimental
+paths:
+  /feeds/kronos/playground/{symbolKey}:
+    post:
+      operationId: runKronosPlayground
+      tags:
+      - Experimental
+      summary: POST /playground/:symbol
+      description: Experimental — run a prediction with custom inference params (T, top_p, sample_count, pred_len, lookback). Price scales linearly with sample_count ($0.005 per 20 samples, capped at $0.025 for sample_count=100). sample_count >100 is rejected. Rate-limited 3/5min per IP and 3/5min per payer wallet.
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: dynamic
+          currency: USD
+          base_amount: '0.005000'
+          price_tiers: 'sample_count 1-20: $0.005, 21-40: $0.010, 41-60: $0.015, 61-80: $0.020, 81-100: $0.025. >100 rejected.'
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        description: 'Kronos symbol key — on-demand discovery for any Gate.io symbol (crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt. On-demand examples: nvda_usdt, xauusd_usdt, eurusd_usdt, doge_usdt. Unknown symbols return 404 with available keys.'
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          maxLength: 50
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timeframes:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                    - 5m
+                    - 15m
+                    - 1h
+                    - 4h
+                    - 1d
+                config:
+                  type: object
+                  properties:
+                    T:
+                      type: number
+                      minimum: 0
+                      maximum: 2
+                    top_p:
+                      type: number
+                      minimum: 0
+                      maximum: 1
+                    sample_count:
+                      type: integer
+                      minimum: 1
+                      maximum: 100
+                    pred_len:
+                      type: object
+                      additionalProperties:
+                        type: integer
+                    lookback:
+                      type: object
+                      additionalProperties:
+                        type: integer
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '402':
+          description: x402 payment challenge. Returned by paid endpoints when no valid payment is provided. The response body contains x402Version and accepts[] with the exact payment requirements (network, asset, amount, payTo, scheme). See /.well-known/x402 for the full manifest.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  x402Version:
+                    type: integer
+                    const: 2
+                  accepts:
+                    type: array
+                    items:
+                      type: object
+        '429':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Kronos is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+  securitySchemes:
+    x402Payment:
+      type: apiKey
+      in: header
+      name: PAYMENT-SIGNATURE
+      description: x402 v2 payment payload. Required for paid endpoints when the service manifest at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+externalDocs:
+  description: Kronos agent quickstart
+  url: https://kronos.seshat.markets/kronos/skill.md
+x-discovery:
+  llms_txt: https://kronos.seshat.markets/kronos/llms.txt
+  registry: https://kronos.seshat.markets/kronos/registry.json
+  x402: https://kronos.seshat.markets/.well-known/x402

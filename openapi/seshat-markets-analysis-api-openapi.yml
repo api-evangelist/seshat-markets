@@ -1,0 +1,366 @@
+openapi: 3.2.0
+info:
+  title: Kronos Quant Signal Analysis API
+  version: 2.1.0
+  summary: Auditable multi-asset financial forecasts for agents
+  description: Kronos publishes cached multi-timeframe forecasts across crypto, commodities, and pre-market equities. Includes calibrated ranges, risk context, auditable decision records, and cross-symbol regime detection. Research and decision support only; not financial advice. x402 payments are active on mainnet (Solana mainnet + Base mainnet) via the PayAI facilitator. See /.well-known/x402 for exact requirements.
+  termsOfService: https://kronos.seshat.markets/
+  x-guidance: Use the catalog first, prefer cached reads, cite generated_at/decision_id, and verify outcomes through the audit record. Do not treat directional context as a standalone trading instruction.
+  x-disclaimer: Kronos is a quantitative research signal, not investment advice. Forecasts are for research and integration purposes only. Always do your own research.
+servers:
+- url: https://kronos.seshat.markets/api
+  description: Kronos production API
+tags:
+- name: Analysis
+paths:
+  /feeds/kronos/accuracy-preview/{symbolKey}:
+    get:
+      operationId: kronos_accuracy_preview
+      tags:
+      - Analysis
+      summary: GET /accuracy-preview/:symbol
+      description: Free preview of the accuracy report for a single symbol — total predictions, correct calls, hit rate, avg Brier score, calibration status and baselines (no-change/momentum accuracy + edge). Strips risk_state and candle_audit, which stay behind the paid /accuracy and /accuracy/candles endpoints.
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+  /feeds/kronos/accuracy/candles:
+    get:
+      operationId: kronos_accuracy_candles
+      tags:
+      - Analysis
+      summary: GET /accuracy/candles
+      description: Granular model performance — per-timeframe candle-level audit with MAPE (mean absolute percentage error) and MAE (mean absolute error) broken down by 5m, 15m, 1h, 4h, 1d. Computed from 47k+ audited candles. Shows exactly which timeframes the model predicts best. Filter by ?symbol and ?limit.
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.005000'
+  /feeds/kronos/accuracy/candles-preview:
+    get:
+      operationId: kronos_accuracy_candles_preview
+      tags:
+      - Analysis
+      summary: GET /accuracy/candles-preview
+      description: Free preview of per-timeframe candle-level audit (MAPE/MAE by 5m, 15m, 1h, 4h, 1d) — aggregate across all symbols only, rounded to 1 decimal. Full precision and per-symbol filtering stay behind the paid /accuracy/candles endpoint.
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+  /feeds/kronos/risk/history:
+    get:
+      operationId: kronos_risk_history
+      tags:
+      - Analysis
+      summary: GET /risk/history
+      description: Historical streak analytics — best and worst streaks ever, broken down globally, per symbol (BTC, ETH, SOL, XRP, etc.) and per timeframe (5m, 15m, 1h, 4h, 1d). Includes date ranges for each streak. Separate from /risk so expensive all-history aggregation does not affect live decisions. Only counts decisions from the default preset (standard agent pipeline, not playground experiments).
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.020000'
+  /feeds/kronos/forecast-evolution/{symbolKey}:
+    get:
+      operationId: getForecastEvolution
+      tags:
+      - Analysis
+      summary: GET /forecast-evolution/:symbol
+      description: How the forecast for a symbol has changed over time — direction flips, confidence drift, upside_prob revision and audited accuracy of each revision. Each revision includes market_key (e.g. btc-10m, btc-1h, or null for background scheduler predictions) and timeframes used. Reveals the trajectory of the model's opinion, not just the latest reading. ?hours to set lookback (default 24, max 168). ?market_key=btc-10m to filter by specific market. ?limit to cap revisions (default 144, max 1000). ?summary=1 for summary-only (no revisions array).
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.005000'
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        description: 'Kronos symbol key — on-demand discovery for any Gate.io symbol (crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt. On-demand examples: nvda_usdt, xauusd_usdt, eurusd_usdt, doge_usdt. Unknown symbols return 404 with available keys.'
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          maxLength: 50
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+      - name: hours
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 24
+          minimum: 1
+          maximum: 168
+        description: Lookback window in hours (default 24, max 168).
+      - name: market_key
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 50
+        description: Filter by market key, e.g. btc-10m, btc-1h, btc-12h. If omitted, returns all revisions including background scheduler predictions (market_key=null).
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 144
+          maximum: 1000
+        description: Maximum number of revisions to return (default 144, max 1000).
+      - name: summary
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - '0'
+          - '1'
+          - 'true'
+          - 'false'
+        description: Set to 1 or true to return only the summary block (no revisions array).
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '503':
+          description: Kronos is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /feeds/kronos/historical-analogs/{symbolKey}:
+    get:
+      operationId: getHistoricalAnalogs
+      tags:
+      - Analysis
+      summary: GET /historical-analogs/:symbol
+      description: 'Past audited situations similar to the current forecast (same direction, similar confidence and upside_prob) and what actually happened — accuracy, median change, outcome distribution, max adverse/favorable and percentiles. Empirical evidence from analogous situations. ?days, ?limit, ?confidenceTol, ?upsideTol to tune matching. ?full=1 returns all analogs (default: top 10 + summary).'
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.010000'
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        description: 'Kronos symbol key — on-demand discovery for any Gate.io symbol (crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt. On-demand examples: nvda_usdt, xauusd_usdt, eurusd_usdt, doge_usdt. Unknown symbols return 404 with available keys.'
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          maxLength: 50
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 30
+          minimum: 1
+          maximum: 365
+        description: Lookback days (default 30, max 365)
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 200
+          minimum: 1
+          maximum: 500
+        description: Max analogs to search (default 200, max 500). ?full=1 returns all; default returns top 10 + summary.
+      - name: confidenceTol
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 0.15
+          minimum: 0.01
+          maximum: 0.5
+      - name: upsideTol
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 15
+          minimum: 1
+          maximum: 50
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Kronos is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /feeds/kronos/regime:
+    get:
+      operationId: getKronosRegime
+      tags:
+      - Analysis
+      summary: GET /regime
+      description: Cross-symbol regime signal — how aligned are all Kronos-covered assets right now? When ≥3 symbols share the same consensus direction, it signals risk-on or risk-off. Includes historical alignment events with accuracy. ?days and ?minSymbols to configure.
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.020000'
+      parameters:
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 30
+          minimum: 1
+          maximum: 365
+      - name: minSymbols
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 3
+          minimum: 2
+          maximum: 10
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '503':
+          description: Kronos is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /feeds/kronos/composite/{symbolKey}:
+    get:
+      operationId: getKronosComposite
+      tags:
+      - Analysis
+      summary: GET /composite/:symbol
+      description: Quant vs Crowd — compares Kronos forecasts against LLM agents and human votes. Shows agreement/divergence rates, who wins when they disagree, per-duration breakdown and the current live signal. ?days to set lookback.
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.010000'
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        description: 'Kronos symbol key — on-demand discovery for any Gate.io symbol (crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt. On-demand examples: nvda_usdt, xauusd_usdt, eurusd_usdt, doge_usdt. Unknown symbols return 404 with available keys.'
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          maxLength: 50
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 30
+          minimum: 1
+          maximum: 365
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+  securitySchemes:
+    x402Payment:
+      type: apiKey
+      in: header
+      name: PAYMENT-SIGNATURE
+      description: x402 v2 payment payload. Required for paid endpoints when the service manifest at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+externalDocs:
+  description: Kronos agent quickstart
+  url: https://kronos.seshat.markets/kronos/skill.md
+x-discovery:
+  llms_txt: https://kronos.seshat.markets/kronos/llms.txt
+  registry: https://kronos.seshat.markets/kronos/registry.json
+  x402: https://kronos.seshat.markets/.well-known/x402

@@ -1,0 +1,231 @@
+openapi: 3.2.0
+info:
+  title: Kronos Quant Signal Agent API
+  version: 2.1.0
+  summary: Auditable multi-asset financial forecasts for agents
+  description: Kronos publishes cached multi-timeframe forecasts across crypto, commodities, and pre-market equities. Includes calibrated ranges, risk context, auditable decision records, and cross-symbol regime detection. Research and decision support only; not financial advice. x402 payments are active on mainnet (Solana mainnet + Base mainnet) via the PayAI facilitator. See /.well-known/x402 for exact requirements.
+  termsOfService: https://kronos.seshat.markets/
+  x-guidance: Use the catalog first, prefer cached reads, cite generated_at/decision_id, and verify outcomes through the audit record. Do not treat directional context as a standalone trading instruction.
+  x-disclaimer: Kronos is a quantitative research signal, not investment advice. Forecasts are for research and integration purposes only. Always do your own research.
+servers:
+- url: https://kronos.seshat.markets/api
+  description: Kronos production API
+tags:
+- name: Agent
+paths:
+  /feeds/kronos/agent/track-record:
+    get:
+      operationId: getKronosAgentTrackRecord
+      tags:
+      - Agent
+      summary: GET /agent/track-record
+      description: 'Agent track record — measures Kronos as a market voter (option voted vs market outcome): win rate, Brier score, per-coin breakdown and daily evolution. Filter by ?coin and ?days. Not the same as /accuracy, which measures the Kronos forecast model (predicted direction vs actual price at horizon).'
+      parameters:
+      - name: coin
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 20
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 30
+          maximum: 365
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.001000'
+  /feeds/kronos/agent/votes:
+    get:
+      operationId: getKronosAgentVotes
+      tags:
+      - Agent
+      summary: GET /agent/votes
+      description: Recent agent votes with market context, confidence, rationale and outcome. Paginate with ?limit (default 50) and ?offset, filter by ?coin. ?full=1 includes rationale and research_notes text.
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 50
+          minimum: 1
+          maximum: 500
+        description: Max votes to return (default 50, max 500)
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 10000
+      - name: coin
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 20
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.003000'
+  /feeds/kronos/agent/signals:
+    get:
+      operationId: getKronosAgentSignals
+      tags:
+      - Agent
+      summary: GET /agent/signals
+      description: Live view of open markets where the agent is actively voting — includes vote status and cached predictions per market.
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.005000'
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /feeds/kronos/composite-preview/{symbolKey}:
+    get:
+      operationId: kronos_composite_preview
+      tags:
+      - Agent
+      summary: GET /composite-preview/:symbol
+      description: Free preview of the Quant (Kronos) vs Crowd composite signal — same agreement/divergence read as /composite, aggregated/delayed. ?days controls lookback (default 30, max 365). Full per-duration breakdown and history stay behind the paid endpoint.
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+  /feeds/kronos/confluence/{symbolKey}:
+    get:
+      operationId: kronos_confluence
+      tags:
+      - Agent
+      summary: GET /confluence/:symbol
+      description: 'Fuses the Kronos model''s directional forecast with independent external signals — social sentiment from Gate.io MCP (bullish/bearish/neutral) and the quant-vs-crowd composite (Polymarket-style votes) — into a simple AGREE/CONFLICT/NEUTRAL tag per signal plus an overall confluence score. Lightweight: reuses cached sentiment (60s TTL) and cached consensus — no fresh GPU inference. ?days controls crowd lookback (default 30, max 365).'
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.010000'
+  /feeds/kronos/benchmark-preview:
+    get:
+      operationId: kronos_benchmark_preview
+      tags:
+      - Agent
+      summary: GET /benchmark-preview
+      description: Free preview of the benchmark leaderboard — ranks Kronos against every LLM agent and human forecaster by accuracy and Brier score, fixed 7-day window, min 10 resolved, no per-coin detail. Configurable window and per-coin breakdown stay behind the paid /benchmark endpoint.
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+  /feeds/kronos/benchmark:
+    get:
+      operationId: kronos_benchmark
+      tags:
+      - Agent
+      summary: GET /benchmark
+      description: Benchmark leaderboard — ranks Kronos against every LLM agent and human forecasters by accuracy and Brier score on crypto markets. Kronos model-level stats (audited predictions, accuracy, Brier). Use ?detail=1 for per-coin breakdown. ?days for lookback, ?minResolved to filter agents with too few votes.
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.020000'
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+  securitySchemes:
+    x402Payment:
+      type: apiKey
+      in: header
+      name: PAYMENT-SIGNATURE
+      description: x402 v2 payment payload. Required for paid endpoints when the service manifest at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+externalDocs:
+  description: Kronos agent quickstart
+  url: https://kronos.seshat.markets/kronos/skill.md
+x-discovery:
+  llms_txt: https://kronos.seshat.markets/kronos/llms.txt
+  registry: https://kronos.seshat.markets/kronos/registry.json
+  x402: https://kronos.seshat.markets/.well-known/x402

@@ -1,0 +1,113 @@
+openapi: 3.2.0
+info:
+  title: Kronos Quant Signal Market Intelligence API
+  version: 2.1.0
+  summary: Auditable multi-asset financial forecasts for agents
+  description: Kronos publishes cached multi-timeframe forecasts across crypto, commodities, and pre-market equities. Includes calibrated ranges, risk context, auditable decision records, and cross-symbol regime detection. Research and decision support only; not financial advice. x402 payments are active on mainnet (Solana mainnet + Base mainnet) via the PayAI facilitator. See /.well-known/x402 for exact requirements.
+  termsOfService: https://kronos.seshat.markets/
+  x-guidance: Use the catalog first, prefer cached reads, cite generated_at/decision_id, and verify outcomes through the audit record. Do not treat directional context as a standalone trading instruction.
+  x-disclaimer: Kronos is a quantitative research signal, not investment advice. Forecasts are for research and integration purposes only. Always do your own research.
+servers:
+- url: https://kronos.seshat.markets/api
+  description: Kronos production API
+tags:
+- name: Market Intelligence
+paths:
+  /feeds/kronos/market-brief/{symbolKey}:
+    get:
+      operationId: kronos_market_brief
+      tags:
+      - Market Intelligence
+      summary: GET /market-brief/:symbol
+      description: Combines Gate.io news, social sentiment, exchange announcements, event attribution, historical resolution context, similar-market outcomes, and Kronos forecast/risk/regime data. Returns an AI-generated market brief with market narrative, catalysts, risks, contradictions, model alignment, historical context, constructive next step, source status and freshness. External claims are required to reference supplied evidence; unavailable sources are reported rather than hidden.
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+        description: 'Kronos symbol key (on-demand discovery: any Gate.io symbol — crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt, bz_usdt, ng_usdt, xaut_usdt, xag_usdt, cl_usdt, openai_usdt, anthropic_usdt, nvdax_usdt, tslax_usdt, metax_usdt, eurusd_usdt, gbpusd_usdt. On-demand examples: nvda_usdt, tsla_usdt, doge_usdt, ada_usdt. Unknown symbols return 404 with available keys.'
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.050000'
+  /feeds/kronos/market-context/{symbolKey}:
+    get:
+      operationId: kronos_market_context
+      tags:
+      - Market Intelligence
+      summary: GET /market-context/:symbol
+      description: Combines Binance/OKX/Gate cross-venue crypto context (funding, open interest, basis, spot, liquidations, options IV) with Gate on-demand market discovery for crypto, stocks, forex, metals, commodities and indices. On-demand crypto symbols aggregate Binance+OKX+Gate in parallel with graceful degradation. Returns source status, options availability and cached Kronos context. TradFi instruments are identified as perpetuals, CFDs or tokenized exposures; no market is created and no auto-voting is enabled.
+      parameters:
+      - name: symbolKey
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-z0-9_]+$
+          examples:
+          - btc_usdt
+          - eth_usdt
+          - nvda_usdt
+          - xauusd_usdt
+          - eurusd_usdt
+        description: 'Kronos symbol key (on-demand discovery: any Gate.io symbol — crypto, stocks, forex, metals, commodities, indices). Curated: btc_usdt, eth_usdt, sol_usdt, xrp_usdt, bnb_usdt. On-demand examples: nvda_usdt, tsla_usdt, xauusd_usdt, eurusd_usdt, doge_usdt. Unknown symbols return 404 with available keys.'
+      responses:
+        '200':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+        '502':
+          description: JSON response
+          content:
+            application/json:
+              schema:
+                type: object
+      x-payment-info:
+        status: active
+        protocols:
+        - x402: {}
+        price:
+          mode: fixed
+          currency: USD
+          amount: '0.030000'
+components:
+  securitySchemes:
+    x402Payment:
+      type: apiKey
+      in: header
+      name: PAYMENT-SIGNATURE
+      description: x402 v2 payment payload. Required for paid endpoints when the service manifest at /.well-known/x402 has enforcement=active_mainnet. Send the signed payment in this header (or the legacy X-PAYMENT header) to satisfy the 402 challenge.
+externalDocs:
+  description: Kronos agent quickstart
+  url: https://kronos.seshat.markets/kronos/skill.md
+x-discovery:
+  llms_txt: https://kronos.seshat.markets/kronos/llms.txt
+  registry: https://kronos.seshat.markets/kronos/registry.json
+  x402: https://kronos.seshat.markets/.well-known/x402
