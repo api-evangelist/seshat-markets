@@ -49,15 +49,59 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    KronosSamplePolicy:
+    KronosConsensus:
+      type: object
+      description: Aggregate directional reading across the requested timeframes.
+      properties:
+        direction:
+          type: string
+          enum:
+          - LONG
+          - SHORT
+          - NEUTRAL
+        confidence:
+          type: number
+          description: 0-1 agreement strength across timeframes.
+        upside_prob_avg:
+          type: number
+          description: Average upside probability across timeframes (0-100).
+        total_timeframes:
+          type: integer
+        agreeing_timeframes:
+          type: integer
+      required:
+      - direction
+      - total_timeframes
+      - agreeing_timeframes
+    Error:
       type: object
       properties:
-        symbol:
+        error:
           type: string
-        delay_minutes:
-          type: integer
-        realtime:
-          type: boolean
+        detail:
+          type: string
+    KronosForecast:
+      type: object
+      description: Conformal calibrated price range.
+      properties:
+        low:
+          type: number
+        high:
+          type: number
+        coverage:
+          type: number
+        predicted_at:
+          type: string
+          format: date-time
+        method:
+          type: string
+          enum:
+          - dynamic_calibration
+          - default_widening
+      required:
+      - low
+      - high
+      - coverage
     KronosTimeframeResult:
       type: object
       properties:
@@ -95,59 +139,6 @@ components:
       - direction
       - current_price
       - predicted_price
-    KronosForecast:
-      type: object
-      description: Conformal calibrated price range.
-      properties:
-        low:
-          type: number
-        high:
-          type: number
-        coverage:
-          type: number
-        predicted_at:
-          type: string
-          format: date-time
-        method:
-          type: string
-          enum:
-          - dynamic_calibration
-          - default_widening
-      required:
-      - low
-      - high
-      - coverage
-    KronosConsensus:
-      type: object
-      description: Aggregate directional reading across the requested timeframes.
-      properties:
-        direction:
-          type: string
-          enum:
-          - LONG
-          - SHORT
-          - NEUTRAL
-        confidence:
-          type: number
-          description: 0-1 agreement strength across timeframes.
-        upside_prob_avg:
-          type: number
-          description: Average upside probability across timeframes (0-100).
-        total_timeframes:
-          type: integer
-        agreeing_timeframes:
-          type: integer
-      required:
-      - direction
-      - total_timeframes
-      - agreeing_timeframes
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-        detail:
-          type: string
     KronosForecastResponse:
       type: object
       description: Kronos forecast response shared by /sample and /predict endpoints.
@@ -174,6 +165,15 @@ components:
       - timestamp
       - timeframes
       - consensus
+    KronosSamplePolicy:
+      type: object
+      properties:
+        symbol:
+          type: string
+        delay_minutes:
+          type: integer
+        realtime:
+          type: boolean
   securitySchemes:
     x402Payment:
       type: apiKey

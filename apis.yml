@@ -379,3 +379,10 @@ common:
   url: sandbox/seshat-markets-sandbox.yml
 - type: Packages
   url: packages/seshat-markets-packages.yml
+x-x402:
+  verified: true
+  probed: '2026-09-24'
+  url: "https://kronos.seshat.markets/api/feeds/kronos/benchmark"
+  evidence:
+  - "header:payment-required"
+  control: 200
