@@ -285,6 +285,56 @@ paths:
           amount: '0.030000'
 components:
   schemas:
+    KronosForecastResponse:
+      type: object
+      description: Kronos forecast response shared by /sample and /predict endpoints.
+      properties:
+        pair:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        timeframes:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/KronosTimeframeResult'
+        consensus:
+          $ref: '#/components/schemas/KronosConsensus'
+        forecast:
+          $ref: '#/components/schemas/KronosForecast'
+        sample:
+          type: boolean
+        sample_policy:
+          $ref: '#/components/schemas/KronosSamplePolicy'
+      required:
+      - pair
+      - timestamp
+      - timeframes
+      - consensus
+    KronosConsensus:
+      type: object
+      description: Aggregate directional reading across the requested timeframes.
+      properties:
+        direction:
+          type: string
+          enum:
+          - LONG
+          - SHORT
+          - NEUTRAL
+        confidence:
+          type: number
+          description: 0-1 agreement strength across timeframes.
+        upside_prob_avg:
+          type: number
+          description: Average upside probability across timeframes (0-100).
+        total_timeframes:
+          type: integer
+        agreeing_timeframes:
+          type: integer
+      required:
+      - direction
+      - total_timeframes
+      - agreeing_timeframes
     KronosTimeframeResult:
       type: object
       properties:
@@ -322,32 +372,15 @@ components:
       - direction
       - current_price
       - predicted_price
-    KronosForecastResponse:
+    KronosSamplePolicy:
       type: object
-      description: Kronos forecast response shared by /sample and /predict endpoints.
       properties:
-        pair:
+        symbol:
           type: string
-        timestamp:
-          type: string
-          format: date-time
-        timeframes:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/KronosTimeframeResult'
-        consensus:
-          $ref: '#/components/schemas/KronosConsensus'
-        forecast:
-          $ref: '#/components/schemas/KronosForecast'
-        sample:
+        delay_minutes:
+          type: integer
+        realtime:
           type: boolean
-        sample_policy:
-          $ref: '#/components/schemas/KronosSamplePolicy'
-      required:
-      - pair
-      - timestamp
-      - timeframes
-      - consensus
     Error:
       type: object
       properties:
@@ -377,39 +410,6 @@ components:
       - low
       - high
       - coverage
-    KronosSamplePolicy:
-      type: object
-      properties:
-        symbol:
-          type: string
-        delay_minutes:
-          type: integer
-        realtime:
-          type: boolean
-    KronosConsensus:
-      type: object
-      description: Aggregate directional reading across the requested timeframes.
-      properties:
-        direction:
-          type: string
-          enum:
-          - LONG
-          - SHORT
-          - NEUTRAL
-        confidence:
-          type: number
-          description: 0-1 agreement strength across timeframes.
-        upside_prob_avg:
-          type: number
-          description: Average upside probability across timeframes (0-100).
-        total_timeframes:
-          type: integer
-        agreeing_timeframes:
-          type: integer
-      required:
-      - direction
-      - total_timeframes
-      - agreeing_timeframes
   securitySchemes:
     x402Payment:
       type: apiKey
