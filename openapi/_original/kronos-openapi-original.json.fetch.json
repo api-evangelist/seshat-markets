@@ -1,0 +1,12 @@
+{
+ "url": "https://kronos.seshat.markets/openapi.json",
+ "requested_url": "https://kronos.seshat.markets/openapi.json",
+ "status": 200,
+ "content_type": "application/json",
+ "bytes": 82944,
+ "sha256": "4f49ec6a95e38a116edc39db2f55e2e9e87c7f59857721249f4c45b711c8bdcc",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the archived file is byte-identical to what the provider serves."
+}
