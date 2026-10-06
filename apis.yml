@@ -5,7 +5,7 @@ description: A public, keyless, agent-native quantitative forecasting API by Ses
 url: https://raw.githubusercontent.com/api-evangelist/seshat-markets/refs/heads/main/apis.yml
 image: https://kronos.seshat.markets/assets/kronos-seshat-logo.webp
 created: '2026-09-05'
-modified: '2026-09-05'
+modified: '2026-10-06'
 specificationVersion: '0.21'
 tags:
 - Finance
@@ -321,6 +321,8 @@ x-source:
     "kronos" alone collides with the workforce-software legacy brand). The root host soft-200s but /api/* discriminates
     -- control 404s at 155b.
 common:
+- url: https://seshat.markets/blog/
+  type: Blog
 - type: AgentSkill
   url: https://kronos.seshat.markets/kronos/skill.md
 - type: Overlay
