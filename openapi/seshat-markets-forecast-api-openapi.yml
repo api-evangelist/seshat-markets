@@ -285,6 +285,50 @@ paths:
           amount: '0.030000'
 components:
   schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
+    KronosTimeframeResult:
+      type: object
+      properties:
+        pred_len:
+          type: integer
+        pred_max:
+          type: number
+        pred_min:
+          type: number
+        direction:
+          type: string
+          enum:
+          - LONG
+          - SHORT
+          - NEUTRAL
+        elapsed_s:
+          type: number
+        change_pct:
+          type: number
+        upside_prob:
+          type: number
+        pred_candles:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+            minItems: 4
+            maxItems: 4
+        current_price:
+          type: number
+        predicted_price:
+          type: number
+      required:
+      - direction
+      - current_price
+      - predicted_price
     KronosForecastResponse:
       type: object
       description: Kronos forecast response shared by /sample and /predict endpoints.
@@ -335,59 +379,6 @@ components:
       - direction
       - total_timeframes
       - agreeing_timeframes
-    KronosTimeframeResult:
-      type: object
-      properties:
-        pred_len:
-          type: integer
-        pred_max:
-          type: number
-        pred_min:
-          type: number
-        direction:
-          type: string
-          enum:
-          - LONG
-          - SHORT
-          - NEUTRAL
-        elapsed_s:
-          type: number
-        change_pct:
-          type: number
-        upside_prob:
-          type: number
-        pred_candles:
-          type: array
-          items:
-            type: array
-            items:
-              type: number
-            minItems: 4
-            maxItems: 4
-        current_price:
-          type: number
-        predicted_price:
-          type: number
-      required:
-      - direction
-      - current_price
-      - predicted_price
-    KronosSamplePolicy:
-      type: object
-      properties:
-        symbol:
-          type: string
-        delay_minutes:
-          type: integer
-        realtime:
-          type: boolean
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-        detail:
-          type: string
     KronosForecast:
       type: object
       description: Conformal calibrated price range.
@@ -410,6 +401,15 @@ components:
       - low
       - high
       - coverage
+    KronosSamplePolicy:
+      type: object
+      properties:
+        symbol:
+          type: string
+        delay_minutes:
+          type: integer
+        realtime:
+          type: boolean
   securitySchemes:
     x402Payment:
       type: apiKey
