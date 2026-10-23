@@ -139,3 +139,9 @@ x-discovery:
   llms_txt: https://kronos.seshat.markets/kronos/llms.txt
   registry: https://kronos.seshat.markets/kronos/registry.json
   x402: https://kronos.seshat.markets/.well-known/x402
+x-provenance:
+  method: harvested
+  publisher: Seshat Markets
+  source: https://kronos.seshat.markets/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)
